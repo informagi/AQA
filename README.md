@@ -38,7 +38,6 @@ $ ./bin/elasticsearch
 After starting the server, to check the elasticsearch is running, `curl http://localhost:9200` should yield the following:
 
 ```bash
-
 # {
 #   "name" : "tusi",
 #   "cluster_name" : "elasticsearch",
@@ -56,7 +55,90 @@ After starting the server, to check the elasticsearch is running, `curl http://l
 #   },
 #   "tagline" : "You Know, for Search"
 # }
-
 ```
 
+```bash
+uvicorn serve:app --port 8000 --app-dir retriever_server
+```
+
+### 1.1.2 Starting the LLM Server
+
+```bash
+MODEL_NAME=flan-t5-xl uvicorn serve:app --port 8010 --app-dir llm_server # model_name: flan-t5-xxl, flan-t5-xl
+```
+
+
+### 1.1.3 Adaptive-RAG Datasets and Indices
+Download the data provided by Adaptive-RAG.
+```bash
+$ bash ./download/processed_data.sh
+$ bash ./download/raw_data.sh
+$ python processing_scripts/subsample_dataset_and_remap_paras.py musique dev_diff_size 500
+$ python processing_scripts/subsample_dataset_and_remap_paras.py hotpotqa dev_diff_size 500
+$ python processing_scripts/subsample_dataset_and_remap_paras.py 2wikimultihopqa dev_diff_size 500
+```
+
+```bash
+# Build index
+python retriever_server/build_index.py {dataset_name} # hotpotqa, 2wikimultihopqa, musique
+
+# Handle one-hop datasets and index wiki for them
+bash download_and_process_single_hop_datasets.sh
+
+python retriever_server/build_index.py wiki
+```
+
+After all the indices are created, executing `curl localhost:9200/_cat/indices` should give you the following statistics:
+```bash
+yellow open 2wikimultihopqa D3G8zgeLSnSAO9uDqmP_aQ 1 1   430225 0 235.4mb 235.4mb
+yellow open hotpotqa        C7MAO0frRmit2OVA1eGrPg 1 1  5233329 0   2.1gb   2.1gb
+yellow open musique         yAyiaj5rSXWEvoeH7-umcg 1 1   139416 0  81.9mb  81.9mb
+yellow open wiki            -J8mtXSkRxWZJ5mGkIyCcQ 1 1 21015324 0  13.3gb  13.3gb
+```
+
+
+
+### 1.1.4 Dataset Split for AQA experiments
+
+In our experiments, we rely on the gold complexity label instead of actually using the classifier that is introduced by the AdaptiveRAG. The data with the gold complexity labels is the data that is used to train their classifier and can be found [here](https://github.com/starsuzi/Adaptive-RAG/blob/main/data.tar.gz). 
+<br><br>
+As they have different versions of the dataset according to the models that they use (flan-t5-xl, flan-t5-xxl, gpt) and we only do the experiments using flan-t5-xl, we use the relevant dataset for this model only. This data comes in two versions (binary: constructed using inductive bias only, binary-silver: constructed using model's answers and also the inductive bias of the datasets), we used the binary-silver (combined) version. This file comes with 3809 data points. We will split this to train and test and use it in our evaluations.
+
+The organizing and splitting to get this dataset is done via `AQA_dataset_organizer.py` and `AQA_dataset_splitter.py` scripts. 
+First run `AQA_dataset_organizer.py` script will 1) add ids to the simple datasets (nq, trivia and squad), 2) find and add the gold answer to each question and 3) organize the data points to squad format. 
+Then run the `AQA_dataset_splitter.py` to split the dataset to train and test in the desired way. Make sure to adjust the `dataset_path` in the script to the desired source file for splitting. 
+
+We randomly extract 210 samples for train and 51 samples for test, while ensuring that the train has 70 instances of each complexity label and the test has 17 instances of each. The option for normal split is included in the code too, but in our experiments (train and test ) of AQA and GPTSwarm, we use the equal complexity label distribution splitted datasets. 
+
+### 1.1.4.1 Update
+As the combined data (Silver+Binary) comes with majority of the instances being from the inductive bias source, we did our experiments based on the silver version only (hence the results in the paper are based on the silver only version data). 
+To use the silver version only;
+```bash
+TRAIN_FILE_PATH="./Downloaded data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train.json"
+RAW_DATA_FOLDER="Adaptive-RAG/raw_data"
+OUTPUT_FILE_PATH="./Downloaded data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train_w_answers.json"
+TRANSFORMED_FILE_PATH="./Downloaded data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train_w_answers_in_squad_format.json"
+
+python AQA_dataset_organizer.py --train_file_path TRAIN_FILE_PATH --raw_data_folder RAW_DATA_FOLDER --output_file_path OUTPUT_FILE_PATH --transformed_file_path TRANSFORMED_FILE_PATH
+```
+If decided to use silver+binary version then adapt the TRAIN_FILE_PATH to silver_binary instead.
+
+# 2. Experiments
+
+## 2.1. Config Files
+In the Adaptive-RAG repository, the hyperparameters and prompt schemes used in each experiment is defined using the config files in the [base_configs folder](https://gitlab.science.ru.nl/mhoveyda/AdaptiveQA-2/-/tree/main/Adaptive-RAG/base_configs?ref_type=heads). We chose the config files that were closest to our experiment setup and use them for our experiments. These files can be found under the [base_configs_selected_for_AQA folder](https://gitlab.science.ru.nl/mhoveyda/AdaptiveQA-2/-/tree/main/Adaptive-RAG/base_configs_selected_for_AQA?ref_type=heads).
+
+## 2.2. Running Experiments
+Make sure to adjust `input_path`, `base_config_folder`, `base_output_folder` and `base_log_folder` variables before running the experiments in script `run_inference.sh`. You should run this for both train and the test file that has been created using `AQA_dataset_splitter.py` script.
+
+To run the experiments:
+
+```bash
+export RETRIEVER_HOST="http://localhost"
+export RETRIEVER_PORT=8000
+./run_inference.sh {systm-type} # nor, oner, ircot
+```
+<br>
+We did the Individual Agents evaluation for both the test and train datasets. 
+To train the CMAB we use these results (answers) generated with the run_inference.sh script. 
 
