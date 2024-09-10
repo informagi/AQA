@@ -126,7 +126,7 @@ If decided to use silver+binary version then adapt the TRAIN_FILE_PATH to silver
 # 2. Experiments
 
 ## 2.1. Config Files
-In the Adaptive-RAG repository, the hyperparameters and prompt schemes used in each experiment is defined using the config files in the [base_configs folder](https://gitlab.science.ru.nl/mhoveyda/AdaptiveQA-2/-/tree/main/Adaptive-RAG/base_configs?ref_type=heads). We chose the config files that were closest to our experiment setup and use them for our experiments. These files can be found under the [base_configs_selected_for_AQA folder](https://gitlab.science.ru.nl/mhoveyda/AdaptiveQA-2/-/tree/main/Adaptive-RAG/base_configs_selected_for_AQA?ref_type=heads).
+In the Adaptive-RAG repository, the hyperparameters and prompt schemes used in each experiment is defined using the config files in the [base_configs folder](AQA_project/Adaptive-RAG/base_configs). We chose the config files that were closest to our experiment setup and use them for our experiments. These files can be found under the [base_configs_selected_for_AQA folder](https://gitlab.science.ru.nl/mhoveyda/AdaptiveQA-2/-/tree/main/Adaptive-RAG/base_configs_selected_for_AQA?ref_type=heads).
 
 ## 2.2. Running Experiments
 Make sure to adjust `input_path`, `base_config_folder`, `base_output_folder` and `base_log_folder` variables before running the experiments in script `run_inference.sh`. You should run this for both train and the test file that has been created using `AQA_dataset_splitter.py` script.
@@ -142,3 +142,28 @@ export RETRIEVER_PORT=8000
 We did the Individual Agents evaluation for both the test and train datasets. 
 To train the CMAB we use these results (answers) generated with the run_inference.sh script. 
 
+
+## 2.3. Evaluating Experiments
+### 2.3.1 Individual Agents Evaluation
+
+To evaluate experiments first adjust the `PREDICTION_DIR`, `OURPUT_DIR` and `LOG_DIR` variables in the `run_evaluation.sh` script and then;
+
+```bash
+./run_evaluation.sh {systm-type} # nor, oner, ircot
+```
+<br>
+To view the overall scores check the OUTPUT_DIR and to check the per sample evaluation check the LOG_DIR.
+<br>
+
+
+To Visualize the scores use the `visualize_results.py` script and feed the score files paths to it. 
+
+
+
+## 2.4. CMAB Train and Evaluation
+To do test and train for Individual and Orchestrated optimization with AQA, make sure `ircot` and `Adaptive-RAG` repositories are available. Afterwards, Use `CMAB_last.py` and `CMAB_last_swarm.py` scripts to train and the relevant evaluation scripts for assessment. 
+
+## 2.5. REINFORCE Train and Evaluation
+Necessary changes are made to `GPTSwarm` repository to support our graph design. You can run `run_aqa.py` script to train and evaluate GPTSwarm to compare it with AQA.
+
+- - - 
