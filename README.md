@@ -20,8 +20,43 @@ $ pip install torch==1.13.1+cu117 --extra-index-url https://download.pytorch.org
 $ pip install -r requirements.txt
 ```
 
-##
+### 1.1.1 Starting Retrieval Server
+The retrieval server is necessary for the agents that use retrieval (IR and IRCoT).
+```bash
+$ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.10.2-linux-x86_64.tar.gz
+$ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.10.2-linux-x86_64.tar.gz.sha512
+$ shasum -a 512 -c elasticsearch-7.10.2-linux-x86_64.tar.gz.sha512
+$ tar -xzf elasticsearch-7.10.2-linux-x86_64.tar.gz
 
+# Starting the Server
+$ cd elasticsearch-7.10.2/
+$ ./bin/elasticsearch 
 
+# pkill -f elasticsearch # to stop the server
+```
+
+After starting the server, to check the elasticsearch is running, `curl http://localhost:9200` should yield the following:
+
+```bash
+
+# {
+#   "name" : "tusi",
+#   "cluster_name" : "elasticsearch",
+#   "cluster_uuid" : "RVCNKMvYRSysbDUIy-Q_-w",
+#   "version" : {
+#     "number" : "7.10.2",
+#     "build_flavor" : "default",
+#     "build_type" : "tar",
+#     "build_hash" : "747e1cc71def077253878a59143c1f785afa92b9",
+#     "build_date" : "2021-01-13T00:42:12.435326Z",
+#     "build_snapshot" : false,
+#     "lucene_version" : "8.7.0",
+#     "minimum_wire_compatibility_version" : "6.8.0",
+#     "minimum_index_compatibility_version" : "6.0.0-beta1"
+#   },
+#   "tagline" : "You Know, for Search"
+# }
+
+```
 
 
