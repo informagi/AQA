@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 
+
+
 class DatasetHandler:
     def __init__(self, dataset_path, destination_folder, seed=None):
         self.dataset_path = dataset_path
@@ -211,8 +213,8 @@ class DatasetHandler:
         axes[1, 1].set_title('Test Complexity Label Distribution')
         plt.show()
 
-dataset_path =  "/home/mhoveyda/AdaptiveQA/Downloaded data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train_w_answers_in_squad_format.json"
-destination_folder = './AdaptiveQA/AdaptiveQA_Data_Final'
+dataset_path =  "Adaptive-RAG/downloaded_data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train_w_answers_in_squad_format.json"
+destination_folder = 'AQA_Data_Final'
 
 if not os.path.exists(destination_folder):
     os.makedirs(destination_folder)
