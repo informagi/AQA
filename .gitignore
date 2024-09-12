@@ -22,4 +22,3 @@ Adaptive-RAG/predictions.tar.gz
 Adaptive-RAG/processed_data.tar.gz
 AQA_Data_Final/
 cache/
-Adaptive-RAG/download_and_process_single_hop_datasets.sh
