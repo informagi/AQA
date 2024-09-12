@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -52,6 +52,8 @@ class QuestionParsingStep(InferenceStep):
 @dataclass
 class QuestionAnsweringStep(InferenceStep):
     answer: str
+    conf_info: any = field(default=None)  # Adjust the type according to what conf_info contains
+    run_time_in_seconds: float = field(default=None)
 
 
 @dataclass
