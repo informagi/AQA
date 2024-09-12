@@ -8,19 +8,19 @@ AQA is built based on various codebases/papers; agents are defined/implemented u
 
 # 1. Getting Started 
 
-## 1.1. Agents, Servers, and Datasets 
 First we need to setup the agents and prepare the datasets required for experiments.
-
 ```bash
 $ conda create -n AQA python=3.8
 $ conda activate AQA
+$ git clone https://github.com/informagi/AQA.git
+$ cd AQA
 $ git clone https://github.com/starsuzi/Adaptive-RAG.git
 $ cd Adaptive-RAG
 $ pip install torch==1.13.1+cu117 --extra-index-url https://download.pytorch.org/whl/cu117
 $ pip install -r requirements.txt
 ```
 
-### 1.1.1 Starting Retrieval Server
+### 1.1. Servers
 The retrieval server is necessary for the agents that use retrieval (IR and IRCoT).
 ```bash
 $ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.10.2-linux-x86_64.tar.gz
@@ -28,30 +28,23 @@ $ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.10.2
 $ shasum -a 512 -c elasticsearch-7.10.2-linux-x86_64.tar.gz.sha512
 $ tar -xzf elasticsearch-7.10.2-linux-x86_64.tar.gz
 
-# Starting the Server
+# Starting the ElasticSearch Server
 $ cd elasticsearch-7.10.2/
-$ ./bin/elasticsearch 
+$ ./bin/elasticsearch  # pkill -f elasticsearch  (To stop the server),  curl http://localhost:9200 (To check the elasticsearch server is running)
 
-# pkill -f elasticsearch # to stop the server
+# Starting the Retrieval Server
+$ conda install uvicorn 
+$ uvicorn serve:app --port 8000 --app-dir retriever_server
 ```
 
-To check the elasticsearch is running, use `curl http://localhost:9200`.
-
-
-
-```bash
-conda install uvicorn 
-uvicorn serve:app --port 8000 --app-dir retriever_server
-```
-
-### 1.1.2 Starting the LLM Server
+To start the LLM Server:
 
 ```bash
 MODEL_NAME=flan-t5-xl uvicorn serve:app --port 8010 --app-dir llm_server # model_name: flan-t5-xxl, flan-t5-xl
 ```
 
 
-### 1.1.3 Adaptive-RAG Datasets and Indices
+### 1.2. Adaptive-RAG Datasets 
 Download the data provided by Adaptive-RAG.
 ```bash
 $ bash ./download/processed_data.sh
@@ -61,16 +54,15 @@ $ python processing_scripts/subsample_dataset_and_remap_paras.py hotpotqa dev_di
 $ python processing_scripts/subsample_dataset_and_remap_paras.py 2wikimultihopqa dev_diff_size 500
 ```
 
+## 1.3. Indexing the Data
 ```bash
-# Build index
+# Build index for multihop datasets 
 python retriever_server/build_index.py {dataset_name} # hotpotqa, 2wikimultihopqa, musique
-
 # Handle one-hop datasets and index wiki for them
+mv download_and_process_single_hop_datasets.sh Adaptive-RAG/download_and_process_single_hop_datasets.sh
 bash download_and_process_single_hop_datasets.sh
-
 python retriever_server/build_index.py wiki
 ```
-
 After all the indices are created, executing `curl localhost:9200/_cat/indices` should give you the following statistics:
 ```bash
 yellow open 2wikimultihopqa D3G8zgeLSnSAO9uDqmP_aQ 1 1   430225 0 235.4mb 235.4mb
@@ -79,9 +71,7 @@ yellow open musique         yAyiaj5rSXWEvoeH7-umcg 1 1   139416 0  81.9mb  81.9m
 yellow open wiki            -J8mtXSkRxWZJ5mGkIyCcQ 1 1 21015324 0  13.3gb  13.3gb
 ```
 
-
-
-### 1.1.4 Dataset Split for AQA experiments
+### 1.4. Dataset Split for AQA experiments
 
 In our experiments, we use the gold complexity labels from the data used to train AdaptiveRAG's classifier, which can be downloaded by:
 ```bash
@@ -94,20 +84,24 @@ Use `AQA_dataset_organizer.py` to 1) add IDs to the simple datasets (nq, trivia,
 
 We randomly extract 210 samples for training and 51 for testing, maintaining equal complexity label distribution. For AQA and GPTSwarm experiments, we use this distribution of complexity labels.
 
-### 1.1.4.1 Update
+### 1.4.1. Update
 As the combined data (Silver+Binary) comes with majority of the instances being from the inductive bias source, we did our experiments based on the silver version only (hence the results in the paper are based on the silver only version data). 
 To use the silver version only;
+
 ```bash
 export TRAIN_FILE_PATH="Adaptive-RAG/downloaded_data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train.json"
 export RAW_DATA_FOLDER="Adaptive-RAG/raw_data"
 export OUTPUT_FILE_PATH="Adaptive-RAG/downloaded_data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train_w_answers.json"
 export TRANSFORMED_FILE_PATH="Adaptive-RAG/downloaded_data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train_w_answers_in_squad_format.json"
 
-# python AQA_dataset_organizer.py --train_file_path TRAIN_FILE_PATH --raw_data_folder RAW_DATA_FOLDER --output_file_path OUTPUT_FILE_PATH --transformed_file_path TRANSFORMED_FILE_PATH
 python AQA_dataset_organizer.py --train_file_path "$TRAIN_FILE_PATH" --raw_data_folder "$RAW_DATA_FOLDER" --output_file_path "$OUTPUT_FILE_PATH" --transformed_file_path "$TRANSFORMED_FILE_PATH"
 
 ```
-If decided to use silver+binary version then adapt the TRAIN_FILE_PATH to silver_binary instead.
+Note: To use silver+binary version, change the TRAIN_FILE_PATH to silver_binary instead.
+
+```bash
+python AQA_dataset_splitter.py
+```
 
 # 2. Experiments
 
