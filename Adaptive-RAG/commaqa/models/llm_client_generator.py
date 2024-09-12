@@ -44,6 +44,8 @@ def local_llm_call(
     repetition_penalty=None,
     length_penalty=None,
     keep_prompt=False,
+    output_scores=True,
+    return_dict_in_generate=True,
 ):
     print(f"LOCAL LLM CALL: {model_name}")
     params = {
@@ -95,6 +97,7 @@ def local_llm_call(
     end_time = time.time()  
 
     generated_text, details = extract_information(outputs, tokenizer)
+
     
     return {
         "generated_texts": [generated_text],
@@ -118,7 +121,11 @@ def non_cached_llm_call(  # kwargs doesn't work with caching.
     repetition_penalty=None,
     length_penalty=None,
     keep_prompt=False,
+    output_scores=True,
+    return_dict_in_generate=True,
+
 ) -> Dict:
+    print(f"Calling Non-Cached LLM")
 
     params = {
         "prompt": prompt,
@@ -156,13 +163,15 @@ def non_cached_llm_call(  # kwargs doesn't work with caching.
     if model_name.replace("-", "_") + "_LLM_SERVER_PORT" in os.environ:
         port = os.environ[model_name.replace("-", "_") + "_LLM_SERVER_PORT" + llm_server_key_suffix]
 
-    print(f"\nLLM params: {params}")
+    print(f"\nLLM params for: {params}")
     # for key, value in params.items():
     #     print(f"{key}: {value}")
     
     print(f"\n")
-    response = requests.get(host + ":" + str(port) + "/generate", params=params)
 
+    response = requests.get(host + ":" + str(port) + "/generate", params=params)
+    
+    print(f"The RESPONCE: {response}")
     if response.status_code != 200:
         raise Exception("LLM Generation request failed!")
 
@@ -199,7 +208,11 @@ def cached_llm_call(  # kwargs doesn't work with caching.
     repetition_penalty=None,
     length_penalty=None,
     keep_prompt=False,
+    output_scores=True,
+    return_dict_in_generate=True,
+
 ) -> Dict:
+    print(f"CAlling Cached LLM")
     return non_cached_llm_call(
         prompt,
         model_name,
@@ -214,6 +227,8 @@ def cached_llm_call(  # kwargs doesn't work with caching.
         repetition_penalty=repetition_penalty,
         length_penalty=length_penalty,
         keep_prompt=keep_prompt,
+        output_scores=output_scores,
+        return_dict_in_generate=return_dict_in_generate,
     )
 
 
@@ -231,6 +246,8 @@ def llm_call(
     repetition_penalty=None,
     length_penalty=None,
     keep_prompt=False,
+    output_scores=True,
+    return_dict_in_generate=True,
 ) -> Dict:
     # function = cached_llm_call if not do_sample and temperature > 0 else non_cached_llm_call
     function = non_cached_llm_call if not USE_LOCAL_LLM else local_llm_call
@@ -249,6 +266,8 @@ def llm_call(
         repetition_penalty=repetition_penalty,
         length_penalty=length_penalty,
         keep_prompt=keep_prompt,
+        output_scores=output_scores,
+        return_dict_in_generate=return_dict_in_generate,
     )
 
 
@@ -340,15 +359,19 @@ class LLMClientGenerator:
             "repetition_penalty": self.repetition_penalty,
             "length_penalty": self.length_penalty,
             "keep_prompt": False,
+            "output_scores": True,
+            "return_dict_in_generate":True,
         }
+        print(f"CALLING LLM with params: {params}\n\n")
         result = llm_call(**params)
+        print(f"\n\nResult of: {result}")
 
         generated_texts = result["generated_texts"]
-        conf_info = result["confidence_info"]
+        # conf_info = result["confidence_info"]
         run_time_in_seconds = result.get("run_time_in_seconds", None)
 
         print(f"\nGenerated Texts: {generated_texts}")
-        print(f"\nConfidence Info: {conf_info}")
+        # print(f"\nConfidence Info: {conf_info}")
         print(f"\nRun Time in Seconds: {run_time_in_seconds}")
 
         modified_texts = []
@@ -365,7 +388,9 @@ class LLMClientGenerator:
 
         # TODO: Deal with output-probabilities if needed.
 
-        return sorted(output_seq_score, key=lambda x: x[1]), conf_info, run_time_in_seconds
+        # return sorted(output_seq_score, key=lambda x: x[1]), conf_info, run_time_in_seconds
+        return sorted(output_seq_score, key=lambda x: x[1]), run_time_in_seconds
+
 
 
 if __name__=="__main__":

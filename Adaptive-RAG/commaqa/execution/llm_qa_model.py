@@ -44,7 +44,8 @@ class LLMQAModel:
         question_prompt += "\n\nQ: " + input_question + "\nA:"
         # print("<QA>: ... %s" % question_prompt[-500:])
         # output_text_scores = self.generator.generate_text_sequence(question_prompt)
-        output_text_scores, conf_info, run_time_in_seconds = self.generator.generate_text_sequence(question_prompt)
+        # output_text_scores, conf_info, run_time_in_seconds = self.generator.generate_text_sequence(question_prompt)
+        output_text_scores, run_time_in_seconds = self.generator.generate_text_sequence(question_prompt)
 
         self.num_calls += 1
         if len(output_text_scores) > 1:
@@ -60,11 +61,17 @@ class LLMQAModel:
             else:
                 # No match
                 print("Did not find a match for input regex: {} in {}".format(self.regex_extract, answer_str))
-                return "", [], conf_info, run_time_in_seconds
+                # return "", [], conf_info, run_time_in_seconds
+                return "", [],  run_time_in_seconds
+
         try:
             json_answer = json.loads(answer_str)
-            return json_answer, [], conf_info, run_time_in_seconds
+            # return json_answer, [], conf_info, run_time_in_seconds
+            return json_answer, [], run_time_in_seconds
+
         except ValueError:
             # Not a valid json ignore
             pass
-        return answer_str, [], conf_info, run_time_in_seconds
+        # return answer_str, [], conf_info, run_time_in_seconds
+        return answer_str, [], run_time_in_seconds
+
