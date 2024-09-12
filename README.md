@@ -117,23 +117,31 @@ To run the experiments:
 ```bash
 export RETRIEVER_HOST="http://localhost"
 export RETRIEVER_PORT=8000
+export BASE_CONFIG_FOLDER=$(realpath "./base_configs_selected_for_AQA")
 ```
+For test set:
 
 ```bash
-
-# export INPUT_PATH="AQA_project/AQA_Data_Final/train_aware_210_51.jsonl"
-# export BASE_CONFIG_FOLDER="./base_configs_selected_for_AQA"
-# export BASE_OUTPUT_FOLDER="../Results/Individual_Agents_Executed_Final/train"
-# export BASE_LOG_FOLDER="../LOGS/$(date +'%Y-%m-%d')"
-export BASE_CONFIG_FOLDER=$(realpath "./base_configs_selected_for_AQA")
-
-export BASE_LOG_FOLDER=$(realpath "../LOGS/test/$(date +'%Y-%m-%d')")
+export BASE_LOG_FOLDER=$(mkdir -p "../LOGS/test/$(date +'%Y-%m-%d')" && realpath "../LOGS/test/$(date +'%Y-%m-%d')")
 export INPUT_PATH=$(realpath "../AQA_Data_Final/test_aware_210_51.jsonl")
-export BASE_OUTPUT_FOLDER=$(realpath "../Results/test/individual_agents_executed")
+export BASE_OUTPUT_FOLDER=$(mkdir -p "$(dirname "../Results/test/individual_agents_executed")" && realpath "../Results/test/individual_agents_executed")
 
-
-# Then call the script with the system type argument
 ./run_inference.sh noR
+./run_inference.sh oneR
+./run_inference.sh ircot
+
+```
+
+
+For train set:
+```bash
+export BASE_LOG_FOLDER=$(mkdir -p "$(dirname "../LOGS/train/$(date +'%Y-%m-%d')")" && realpath "../LOGS/train/$(date +'%Y-%m-%d')")
+export INPUT_PATH=$(realpath "../AQA_Data_Final/train_aware_210_51.jsonl")
+export BASE_OUTPUT_FOLDER=$(mkdir -p "$(dirname "../Results/train/individual_agents_executed")" && realpath "../Results/train/individual_agents_executed")
+
+./run_inference.sh noR
+./run_inference.sh oneR
+./run_inference.sh ircot
 
 ```
 <br>
