@@ -138,10 +138,16 @@ class MultiParaRCReader(DatasetReader):
                 query = question = input_instance["question_text"]
                 answers_objects = input_instance["answers_objects"]
 
+                print(f"Answers objects: {answers_objects}")
+
+                if isinstance(answers_objects[0]["spans"][0], list):
+                    answers_objects[0]["spans"] = answers_objects[0]["spans"][0]
+
                 formatted_answers = [  # List of potentially validated answers. Usually it's a list of one item.
                     tuple(format_drop_answer(answers_object)) for answers_object in answers_objects
                 ]
 
+                print(f"formatted_answers: {formatted_answers}")
                 answer = Counter(formatted_answers).most_common()[0][0]
 
                 output_instance = {

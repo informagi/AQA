@@ -125,11 +125,11 @@ export RETRIEVER_PORT=8000
 # export BASE_CONFIG_FOLDER="./base_configs_selected_for_AQA"
 # export BASE_OUTPUT_FOLDER="../Results/Individual_Agents_Executed_Final/train"
 # export BASE_LOG_FOLDER="../LOGS/$(date +'%Y-%m-%d')"
-
-export INPUT_PATH=$(realpath "../AQA_Data_Final/train_aware_210_51.jsonl")
 export BASE_CONFIG_FOLDER=$(realpath "./base_configs_selected_for_AQA")
-export BASE_OUTPUT_FOLDER=$(realpath "../Results/Individual_Agents_Executed_Final/train")
-export BASE_LOG_FOLDER=$(realpath "../LOGS/$(date +'%Y-%m-%d')")
+
+export BASE_LOG_FOLDER=$(realpath "../LOGS/test/$(date +'%Y-%m-%d')")
+export INPUT_PATH=$(realpath "../AQA_Data_Final/test_aware_210_51.jsonl")
+export BASE_OUTPUT_FOLDER=$(realpath "../Results/test/individual_agents_executed")
 
 
 # Then call the script with the system type argument
