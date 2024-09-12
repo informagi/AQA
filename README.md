@@ -14,8 +14,6 @@ $ conda create -n AQA python=3.8
 $ conda activate AQA
 $ git clone https://github.com/informagi/AQA.git
 $ cd AQA
-$ git clone https://github.com/starsuzi/Adaptive-RAG.git
-$ cd Adaptive-RAG
 $ pip install torch==1.13.1+cu117 --extra-index-url https://download.pytorch.org/whl/cu117
 $ pip install -r requirements.txt
 ```
@@ -23,6 +21,7 @@ $ pip install -r requirements.txt
 ### 1.1. Servers
 The retrieval server is necessary for the agents that use retrieval (IR and IRCoT).
 ```bash
+$ cd Adaptive-RAG
 $ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.10.2-linux-x86_64.tar.gz
 $ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.10.2-linux-x86_64.tar.gz.sha512
 $ shasum -a 512 -c elasticsearch-7.10.2-linux-x86_64.tar.gz.sha512
