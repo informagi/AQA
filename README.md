@@ -98,12 +98,14 @@ We randomly extract 210 samples for training and 51 for testing, maintaining equ
 As the combined data (Silver+Binary) comes with majority of the instances being from the inductive bias source, we did our experiments based on the silver version only (hence the results in the paper are based on the silver only version data). 
 To use the silver version only;
 ```bash
-TRAIN_FILE_PATH="./Downloaded data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train.json"
-RAW_DATA_FOLDER="Adaptive-RAG/raw_data"
-OUTPUT_FILE_PATH="./Downloaded data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train_w_answers.json"
-TRANSFORMED_FILE_PATH="./Downloaded data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train_w_answers_in_squad_format.json"
+export TRAIN_FILE_PATH="Adaptive-RAG/downloaded_data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train.json"
+export RAW_DATA_FOLDER="Adaptive-RAG/raw_data"
+export OUTPUT_FILE_PATH="Adaptive-RAG/downloaded_data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train_w_answers.json"
+export TRANSFORMED_FILE_PATH="Adaptive-RAG/downloaded_data/classifier/data/musique_hotpot_wiki2_nq_tqa_sqd/flan_t5_xl/silver/train_w_answers_in_squad_format.json"
 
-python AQA_dataset_organizer.py --train_file_path TRAIN_FILE_PATH --raw_data_folder RAW_DATA_FOLDER --output_file_path OUTPUT_FILE_PATH --transformed_file_path TRANSFORMED_FILE_PATH
+# python AQA_dataset_organizer.py --train_file_path TRAIN_FILE_PATH --raw_data_folder RAW_DATA_FOLDER --output_file_path OUTPUT_FILE_PATH --transformed_file_path TRANSFORMED_FILE_PATH
+python AQA_dataset_organizer.py --train_file_path "$TRAIN_FILE_PATH" --raw_data_folder "$RAW_DATA_FOLDER" --output_file_path "$OUTPUT_FILE_PATH" --transformed_file_path "$TRANSFORMED_FILE_PATH"
+
 ```
 If decided to use silver+binary version then adapt the TRAIN_FILE_PATH to silver_binary instead.
 
