@@ -80,12 +80,14 @@ class LLMQAParticipantModel(ParticipantModel):
     def return_model_calls(self):
         return {"llm_qa": self.num_calls}
 
-    def update_state(self, answer, state):
+    def update_state(self, answer, state, conf_info=None, run_time_in_seconds=None):
         if not self.allow_empty_answers and answer == "":
             print("WARNING: Generate empty answer.")
             return []
         new_state = state.copy()
-        new_state.data.add_answer(QuestionAnsweringStep(answer=json.dumps(answer), score=0, participant=state.next))
+        # new_state.data.add_answer(QuestionAnsweringStep(answer=json.dumps(answer), score=0, participant=state.next))
+        new_state.data.add_answer(QuestionAnsweringStep(answer=json.dumps(answer), score=0, participant=state.next, conf_info=conf_info, run_time_in_seconds=run_time_in_seconds))
+
         new_state.next = self.next_model if self.next_model else self.end_state
         return new_state
 
@@ -114,7 +116,7 @@ class LLMQAParticipantModel(ParticipantModel):
 
         self.num_calls += 1
         context_suffix = extract_key_information(state, self.key_info_type)
-        answer, facts_used = self.qa_model.ask_question(
+        answer, facts_used, conf_info, run_time_in_seconds = self.qa_model.ask_question(
             input_question=question, context=context, context_suffix=context_suffix
         )
 
@@ -132,7 +134,9 @@ class LLMQAParticipantModel(ParticipantModel):
             spacy_object = get_spacy_object()
             state.data["generated_sentences"] = [sent.text_with_ws for sent in spacy_object(answer).sents]
 
-        return self.update_state(answer=answer, state=state)
+        # return self.update_state(answer=answer, state=state)
+        return self.update_state(answer=answer, state=state, conf_info=conf_info, run_time_in_seconds=run_time_in_seconds)
+            
 
 
 def date_difference(date1: str, date2: str, units: str = "years"):
