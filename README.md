@@ -148,7 +148,7 @@ export BASE_OUTPUT_FOLDER=$(mkdir -p "$(dirname "../Results/train/individual_age
 We use the results (answers) generated with the run_inference.sh script to train and evaluate AQA and GPTSwarm. 
 
 
-## 2.2.2. Evaluate Results
+### 2.2.2. Evaluate Results
 
 To evaluate experiments first adjust the `PREDICTION_DIR`, `OURPUT_DIR` and `LOG_DIR` variables in the `run_evaluation.sh` script and then;
 
