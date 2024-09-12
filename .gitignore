@@ -24,3 +24,204 @@ AQA_Data_Final/
 cache/
 LOGS/
 Results/
+
+
+# From GPTSwarm/.gitignore
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+GPTSwarm/.Python
+GPTSwarm/build/
+GPTSwarm/develop-eggs/
+GPTSwarm/dist/
+GPTSwarm/downloads/
+GPTSwarm/eggs/
+GPTSwarm/.eggs/
+GPTSwarm/lib/
+GPTSwarm/lib64/
+GPTSwarm/parts/
+GPTSwarm/sdist/
+GPTSwarm/var/
+GPTSwarm/wheels/
+GPTSwarm/share/python-wheels/
+GPTSwarm/*.egg-info/
+GPTSwarm/.installed.cfg
+GPTSwarm/*.egg
+GPTSwarm/MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+GPTSwarm/*.manifest
+GPTSwarm/*.spec
+
+# Installer logs
+GPTSwarm/pip-log.txt
+GPTSwarm/pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+GPTSwarm/htmlcov/
+GPTSwarm/.tox/
+GPTSwarm/.nox/
+GPTSwarm/.coverage
+GPTSwarm/.coverage.*
+GPTSwarm/.cache
+GPTSwarm/nosetests.xml
+GPTSwarm/coverage.xml
+GPTSwarm/*.cover
+GPTSwarm/*.py,cover
+GPTSwarm/.hypothesis/
+GPTSwarm/.pytest_cache/
+GPTSwarm/cover/
+
+# Translations
+GPTSwarm/*.mo
+GPTSwarm/*.pot
+
+# Django stuff:
+GPTSwarm/*.log
+GPTSwarm/local_settings.py
+GPTSwarm/db.sqlite3
+GPTSwarm/db.sqlite3-journal
+
+# Flask stuff:
+GPTSwarm/instance/
+GPTSwarm/.webassets-cache
+
+# Scrapy stuff:
+GPTSwarm/.scrapy
+
+# Sphinx documentation
+GPTSwarm/docs/_build/
+
+# PyBuilder
+GPTSwarm/.pybuilder/
+GPTSwarm/target/
+
+# Jupyter Notebook
+GPTSwarm/.ipynb_checkpoints
+
+# IPython
+GPTSwarm/profile_default/
+GPTSwarm/ipython_config.py
+
+# pyenv
+#   For a library or package, you might want to ignore these files since the code is
+#   intended to run in multiple environments; otherwise, check them in:
+# .python-version
+
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
+
+# poetry
+#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
+#poetry.lock
+
+# pdm
+#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
+#pdm.lock
+#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
+#   in version control.
+#   https://pdm.fming.dev/#use-with-ide
+GPTSwarm/.pdm.toml
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
+GPTSwarm/__pypackages__/
+
+# Celery stuff
+GPTSwarm/celerybeat-schedule
+GPTSwarm/celerybeat.pid
+
+# SageMath parsed files
+GPTSwarm/*.sage.py
+
+# Environments
+GPTSwarm/.env
+GPTSwarm/.venv
+GPTSwarm/env/
+GPTSwarm/venv/
+GPTSwarm/ENV/
+GPTSwarm/env.bak/
+GPTSwarm/venv.bak/
+
+# Spyder project settings
+GPTSwarm/.spyderproject
+GPTSwarm/.spyproject
+
+# Rope project settings
+GPTSwarm/.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+GPTSwarm/.mypy_cache/
+GPTSwarm/.dmypy.json
+GPTSwarm/dmypy.json
+
+# Pyre type checker
+GPTSwarm/.pyre/
+
+# pytype static type analyzer
+GPTSwarm/.pytype/
+
+# Cython debug symbols
+GPTSwarm/cython_debug/
+
+# PyCharm
+#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
+#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+#  and can be added to the global gitignore or merged into this file.  For a more nuclear
+#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
+#.idea/
+
+# Others
+GPTSwarm/*.DS_Store
+
+# log
+GPTSwarm/result/
+GPTSwarm/logs/
+GPTSwarm/lib/
+
+# VSCODE
+GPTSwarm/vscode/
+GPTSwarm/.vscode/
+
+#.pytest_cache
+GPTSwarm/.pytest_cache/
+
+# others
+GPTSwarm/.coverage
+GPTSwarm/.coveragec
+
+# vis
+GPTSwarm/result/example.html
+GPTSwarm/example.html
+GPTSwarm/datasets/gaia/test_files/
+GPTSwarm/datasets/gaia/val_files
+GPTSwarm/datasets/gaia/*.json
+GPTSwarm/datasets/gaia/utils/*.jsonl
+
+GPTSwarm//runs/
+
+GPTSwarm/.$*.drawio.bkp
+/diagrams/*.pdf
+/diagrams/*.png
+/figures/*.pdf
+/figures/*.png
+
+.pypirc
