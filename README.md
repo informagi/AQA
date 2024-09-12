@@ -83,19 +83,16 @@ yellow open wiki            -J8mtXSkRxWZJ5mGkIyCcQ 1 1 21015324 0  13.3gb  13.3g
 
 ### 1.1.4 Dataset Split for AQA experiments
 
-In our experiments, we rely on the gold complexity label instead of actually using the classifier that is introduced by the AdaptiveRAG. The data with the gold complexity labels is the data that is used to train their classifier and can be downloaded by: 
-<br><br>
+In our experiments, we use the gold complexity labels from the data used to train AdaptiveRAG's classifier, which can be downloaded by:
 ```bash
 mkdir -p downloaded_data && cd downloaded_data && wget https://github.com/starsuzi/Adaptive-RAG/raw/main/data.tar.gz && tar -xzvf data.tar.gz && rm data.tar.gz
-
 ```
-As they have different versions of the dataset according to the models that they use (flan-t5-xl, flan-t5-xxl, gpt) and we only do the experiments using flan-t5-xl, we use the relevant dataset for this model only. This data comes in two versions (binary: constructed using inductive bias only, binary-silver: constructed using model's answers and also the inductive bias of the datasets), we used the binary-silver (combined) version. This file comes with 3809 data points. We will split this to train and test and use it in our evaluations.
 
-The organizing and splitting to get this dataset is done via `AQA_dataset_organizer.py` and `AQA_dataset_splitter.py` scripts. 
-First run `AQA_dataset_organizer.py` script will 1) add ids to the simple datasets (nq, trivia and squad), 2) find and add the gold answer to each question and 3) organize the data points to squad format. 
-Then run the `AQA_dataset_splitter.py` to split the dataset to train and test in the desired way. Make sure to adjust the `dataset_path` in the script to the desired source file for splitting. 
+We use the dataset for the flan-t5-xl model. Of the two versions (binary: inductive bias, and binary-silver: model answers + inductive bias), we use the binary-silver version, which has 3,809 data points. This will be split for training and testing in our evaluations.
 
-We randomly extract 210 samples for train and 51 samples for test, while ensuring that the train has 70 instances of each complexity label and the test has 17 instances of each. The option for normal split is included in the code too, but in our experiments (train and test ) of AQA and GPTSwarm, we use the equal complexity label distribution splitted datasets. 
+Use `AQA_dataset_organizer.py` to 1) add IDs to the simple datasets (nq, trivia, squad), 2) attach gold answers, and 3) format data to squad style. Then, run `AQA_dataset_splitter.py` to split the dataset into train and test sets. Adjust the `dataset_path` in the script as needed."
+
+We randomly extract 210 samples for training and 51 for testing, maintaining equal complexity label distribution. For AQA and GPTSwarm experiments, we use this distribution of complexity labels.
 
 ### 1.1.4.1 Update
 As the combined data (Silver+Binary) comes with majority of the instances being from the inductive bias source, we did our experiments based on the silver version only (hence the results in the paper are based on the silver only version data). 
