@@ -70,7 +70,7 @@ yellow open musique         yAyiaj5rSXWEvoeH7-umcg 1 1   139416 0  81.9mb  81.9m
 yellow open wiki            -J8mtXSkRxWZJ5mGkIyCcQ 1 1 21015324 0  13.3gb  13.3gb
 ```
 
-### 1.4. Dataset Split for AQA experiments
+### 1.4. Sample and Split Dataset for AQA experiments
 
 In our experiments, we use the gold complexity labels from the data used to train AdaptiveRAG's classifier, which can be downloaded by:
 ```bash
@@ -99,13 +99,13 @@ python AQA_dataset_organizer.py --train_file_path "$TRAIN_FILE_PATH" --raw_data_
 Note: To use silver+binary version, change the TRAIN_FILE_PATH to silver_binary instead.
 
 ```bash
-python AQA_dataset_splitter.py
+python AQA_dataset_splitter.py # Will save the final data under AQA_Data_Final folder
 ```
 
 # 2. Experiments
 
-## 2.1. Config Files
-In the Adaptive-RAG repository, the hyperparameters and prompt schemes used in each experiment is defined using the config files in the [base_configs folder](AQA_project/Adaptive-RAG/base_configs). We chose the config files that were closest to our experiment setup and use them for our experiments. These files can be found under the [base_configs_selected_for_AQA folder](https://gitlab.science.ru.nl/mhoveyda/AdaptiveQA-2/-/tree/main/Adaptive-RAG/base_configs_selected_for_AQA?ref_type=heads).
+## 2.1. Agents' Configuration
+In Adaptive-RAG, the hyperparameters and prompt schemes for each experiment are defined in the config files located in the `base_configs` folder. We selected the most relevant config files for our experiments which can be found under the `Adaptive-RAG/base_configs_selected_for_AQA` folder.
 
 ## 2.2. Individual Agents' Evaluation
 
@@ -117,7 +117,24 @@ To run the experiments:
 ```bash
 export RETRIEVER_HOST="http://localhost"
 export RETRIEVER_PORT=8000
-./run_inference.sh {systm-type} # nor, oner, ircot
+```
+
+```bash
+
+# export INPUT_PATH="AQA_project/AQA_Data_Final/train_aware_210_51.jsonl"
+# export BASE_CONFIG_FOLDER="./base_configs_selected_for_AQA"
+# export BASE_OUTPUT_FOLDER="../Results/Individual_Agents_Executed_Final/train"
+# export BASE_LOG_FOLDER="../LOGS/$(date +'%Y-%m-%d')"
+
+export INPUT_PATH=$(realpath "../AQA_Data_Final/train_aware_210_51.jsonl")
+export BASE_CONFIG_FOLDER=$(realpath "./base_configs_selected_for_AQA")
+export BASE_OUTPUT_FOLDER=$(realpath "../Results/Individual_Agents_Executed_Final/train")
+export BASE_LOG_FOLDER=$(realpath "../LOGS/$(date +'%Y-%m-%d')")
+
+
+# Then call the script with the system type argument
+./run_inference.sh noR
+
 ```
 <br>
 We did the Individual Agents evaluation for both the test and train datasets.  We use these results (answers) generated with the run_inference.sh script to train the CMAB. 
