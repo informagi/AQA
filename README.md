@@ -145,7 +145,7 @@ export BASE_OUTPUT_FOLDER=$(mkdir -p "$(dirname "../Results/train/individual_age
 
 ```
 <br>
-We did the Individual Agents evaluation for both the test and train datasets.  We use these results (answers) generated with the run_inference.sh script to train the CMAB. 
+We use the results (answers) generated with the run_inference.sh script to train and evaluate AQA and GPTSwarm. 
 
 
 ## 2.2.2. Evaluate Results
@@ -162,10 +162,10 @@ To view the overall scores check the OUTPUT_DIR and to check the per sample eval
 To Visualize the scores use the `visualize_results.py` script and feed the score files paths to it. 
 
 
-## 2.4. AQA Train and Evaluation
-To train and test for Individual and Orchestrated optimization with AQA, make sure `ircot` and `Adaptive-RAG` repositories are available. Afterwards, Use `CMAB_last.py` and `CMAB_last_swarm.py` scripts to train and the relevant evaluation scripts for assessment. 
+## 2.3. AQA Train and Evaluation
+Use `CMAB_last.py` and `CMAB_last_swarm.py` scripts to train and the relevant evaluation scripts for assessment. 
 
-## 2.5. GPTSwarm Train and Evaluation
+## 2.4. GPTSwarm Train and Evaluation
 Necessary changes are made to `GPTSwarm` repository to support our graph design. You can run `run_aqa.py` script to train and evaluate GPTSwarm to compare it with AQA.
 
 - - - 
