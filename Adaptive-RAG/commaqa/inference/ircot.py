@@ -692,7 +692,10 @@ class StepByStepLLMTitleGenParticipant(ParticipantModel):
 
         prompt = "\n\n\n".join([self.prompt, test_example_str]).strip()
 
-        output_text_scores = self.generator.generate_text_sequence(prompt)
+        # output_text_scores = self.generator.generate_text_sequence(prompt)
+        # output_text_scores, conf_info, run_time_in_seconds = self.generator.generate_text_sequence(prompt)
+        output_text_scores, run_time_in_seconds = self.generator.generate_text_sequence(prompt)
+
 
         if len(output_text_scores) > 1:
             print("Can not handle more than one answer for this model yet" + "\n" + str(output_text_scores))
@@ -838,12 +841,20 @@ class StepByStepCOTGenParticipant(ParticipantModel):
 
             prompt = "\n\n\n".join([self.prompt, test_example_str]).strip()
 
-            output_text_scores = self.generator.generate_text_sequence(prompt)
+            # output_text_scores = self.generator.generate_text_sequence(prompt)
+            # output_text_scores, conf_info, run_time_in_seconds = self.generator.generate_text_sequence(prompt)
+            output_text_scores, run_time_in_seconds = self.generator.generate_text_sequence(prompt)
+
+
+            # new_state.data['conf_info'] = conf_info
+            new_state.data['run_time_in_seconds'] = run_time_in_seconds
+
             if len(output_text_scores) > 1:
                 print("Can not handle more than one answer for this model yet" + "\n" + str(output_text_scores))
 
             new_generation = output_text_scores[0][0].strip()
             new_sents = list(self.spacy_object(new_generation).sents)
+            
             if new_sents:
                 new_generation = new_sents[0].text
                 new_state.data[f"generated_{self.generation_type}"].append(new_generation)
