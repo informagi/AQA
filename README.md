@@ -124,7 +124,7 @@ For test set:
 ```bash
 export BASE_LOG_FOLDER=$(mkdir -p "../LOGS/test/$(date +'%Y-%m-%d')" && realpath "../LOGS/test/$(date +'%Y-%m-%d')")
 export INPUT_PATH=$(realpath "../AQA_Data_Final/test_aware_210_51.jsonl")
-export BASE_OUTPUT_FOLDER=$(mkdir -p "$(dirname "../Results/test/individual_agents_executed")" && realpath "../Results/test/individual_agents_executed")
+export BASE_OUTPUT_FOLDER=$(mkdir -p "$(dirname "../Results/test/IndividualAgents")" && realpath "../Results/test/IndividualAgents")
 
 ./run_inference.sh noR
 ./run_inference.sh oneR
@@ -137,7 +137,7 @@ For train set:
 ```bash
 export BASE_LOG_FOLDER=$(mkdir -p "$(dirname "../LOGS/train/$(date +'%Y-%m-%d')")" && realpath "../LOGS/train/$(date +'%Y-%m-%d')")
 export INPUT_PATH=$(realpath "../AQA_Data_Final/train_aware_210_51.jsonl")
-export BASE_OUTPUT_FOLDER=$(mkdir -p "$(dirname "../Results/train/individual_agents_executed")" && realpath "../Results/train/individual_agents_executed")
+export BASE_OUTPUT_FOLDER=$(mkdir -p "$(dirname "../Results/train/IndividualAgents")" && realpath "../Results/train/IndividualAgents")
 
 ./run_inference.sh noR
 ./run_inference.sh oneR
@@ -149,16 +149,21 @@ We use the results (answers) generated with the run_inference.sh script to train
 
 
 ### 2.2.2. Evaluate Results
-
-To evaluate experiments first adjust the `PREDICTION_DIR`, `OURPUT_DIR` and `LOG_DIR` variables in the `run_evaluation.sh` script and then;
+The evaluation should be run for all the combinations of `EVAL_TYPE` and `MODEL_TYPE`
 
 ```bash
-./run_evaluation.sh {systm-type} # nor, oner, ircot
+export EVAL_TYPE="train" # or train
+export PREDICTION_DIR=$(realpath "../Results/$EVAL_TYPE/IndividualAgents")
+export GOLD_FILE=$(realpath "../AQA_Data_Final/${EVAL_TYPE}_aware_210_51.jsonl")
+export OUTPUT_DIR=$(mkdir -p "../Evaluation/IndividualAgents/$EVAL_TYPE" && realpath "../Evaluation/IndividualAgents/$EVAL_TYPE")
+export MODEL_TYPE="NoR" # or oner or ircot 
+export LOG_DIR=$(mkdir -p "../LOGS/Evaluation/IndividualAgents/$EVAL_TYPE/$(date +'%Y-%m-%d')" && realpath "../LOGS/Evaluation/IndividualAgents/$EVAL_TYPE/$(date +'%Y-%m-%d')")
+
+./run_evaluation.sh
 ```
 <br>
 To view the overall scores check the OUTPUT_DIR and to check the per sample evaluation check the LOG_DIR.
 <br>
-
 To Visualize the scores use the `visualize_results.py` script and feed the score files paths to it. 
 
 

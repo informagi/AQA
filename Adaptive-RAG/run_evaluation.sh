@@ -1,41 +1,47 @@
 #!/bin/bash
 
-# Check if the model type is provided as an argument
-if [ -z "$1" ]; then
-    echo "Usage: $0 <model_type>"
-    echo "Model types: NoR, OneR, IRCoT"
+# Check if all required environment variables are provided
+if [ -z "$MODEL_TYPE" ] || [ -z "$GOLD_FILE" ] || [ -z "$PREDICTION_DIR" ] || [ -z "$OUTPUT_DIR" ] || [ -z "$LOG_DIR" ]; then
+    echo "Error: All environment variables must be set."
+    echo "Required variables: MODEL_TYPE, GOLD_FILE, EVAL_TYPE, PREDICTION_DIR, OUTPUT_DIR, LOG_DIR"
     exit 1
 fi
 
-MODEL_TYPE=$1
-PREDICTION_DIR="/home/mhoveyda/AdaptiveQA/Adaptive-RAG/Agents_Executed_Final_test_w_Confidence"
-OUTPUT_DIR="/home/mhoveyda/AdaptiveQA/Agents_Executed_Final_TEST_Evaluation_Results"
-LOG_DIR="LOGS_Final_Testl/$(date +'%Y-%m-%d')"
+# Check if eval_type is valid
+if [[ "$EVAL_TYPE" != "test" && "$EVAL_TYPE" != "train" ]]; then
+    echo "Invalid eval_type: $EVAL_TYPE"
+    echo "<eval_type> must be either 'test' or 'train'"
+    exit 1
+fi
+
+echo "MODEL_TYPE: $MODEL_TYPE"
+echo "GOLD_FILE: $GOLD_FILE"
+echo "EVAL_TYPE: $EVAL_TYPE"
+echo "PREDICTION_DIR: $PREDICTION_DIR"
+echo "OUTPUT_DIR: $OUTPUT_DIR"
+echo "LOG_DIR: $LOG_DIR"
 
 
 # Create the results and logs directories if they don't exist
-mkdir -p $OUTPUT_DIR
-mkdir -p $LOG_DIR
+mkdir -p "$OUTPUT_DIR"
+mkdir -p "$LOG_DIR"
 
-# Set file paths based on the model type
+# Set file paths based on the model type and eval type
 case $MODEL_TYPE in
     NoR|nor)
-        # PREDICTION_FILE="/home/mhoveyda/AdaptiveQA/Adaptive-RAG/Agents_Executed_Final_Train/nor/nor_qa_flan_xl_train_aware_210_51.json"
-        PREDICTION_FILE="$PREDICTION_DIR/nor/nor_qa_flan_xl_test_aware_210_51.json"
-        OUTPUT_FILE="$OUTPUT_DIR/output_results_nor.json" 
-        LOG_FILE="$LOG_DIR/evaluation_nor.txt"
+        PREDICTION_FILE="$PREDICTION_DIR/nor/nor_qa_flan_xl_${EVAL_TYPE}_aware_210_51.json"
+        OUTPUT_FILE="$OUTPUT_DIR/output_results_nor_${EVAL_TYPE}.json"
+        LOG_FILE="$LOG_DIR/evaluation_nor_${EVAL_TYPE}.txt"
         ;;
     OneR|oner)
-        # PREDICTION_FILE="/home/mhoveyda/AdaptiveQA/Adaptive-RAG/mohanna_test_runs_Last/oner/oner_qa_flan_xl_test_aware_210_51.json"
-        PREDICTION_FILE="$PREDICTION_DIR/oner/oner_qa_flan_xl_test_aware_210_51.json"
-        OUTPUT_FILE="$OUTPUT_DIR/output_results_oner.json"
-        LOG_FILE="$LOG_DIR/evaluation_oner.txt"
+        PREDICTION_FILE="$PREDICTION_DIR/oner/oner_qa_flan_xl_${EVAL_TYPE}_aware_210_51.json"
+        OUTPUT_FILE="$OUTPUT_DIR/output_results_oner_${EVAL_TYPE}.json"
+        LOG_FILE="$LOG_DIR/evaluation_oner_${EVAL_TYPE}.txt"
         ;;
     IRCoT|ircot)
-        # PREDICTION_FILE="/home/mhoveyda/AdaptiveQA/Adaptive-RAG/mohanna_test_runs_Last/ircot/ircot_qa_flan_xl_test_aware_210_51.json"
-        PREDICTION_FILE="$PREDICTION_DIR/ircot/ircot_qa_flan_xl_test_aware_210_51.json"
-        OUTPUT_FILE="$OUTPUT_DIR/output_results_ircot.json"
-        LOG_FILE="$LOG_DIR/evaluation_ircot.txt"
+        PREDICTION_FILE="$PREDICTION_DIR/ircot/ircot_qa_flan_xl_${EVAL_TYPE}_aware_210_51.json"
+        OUTPUT_FILE="$OUTPUT_DIR/output_results_ircot_${EVAL_TYPE}.json"
+        LOG_FILE="$LOG_DIR/evaluation_ircot_${EVAL_TYPE}.txt"
         ;;
     *)
         echo "Invalid model type: $MODEL_TYPE"
@@ -45,8 +51,11 @@ case $MODEL_TYPE in
 esac
 
 # Run the evaluation
-python AQA_final_eval.py $PREDICTION_FILE /home/mhoveyda/AdaptiveQA/AdaptiveQA_Data_Final/test_aware_210_51.jsonl --output_file_path $OUTPUT_FILE > $LOG_FILE 2>&1
+python AQA_final_eval.py "$PREDICTION_FILE" "$GOLD_FILE" --output_file_path "$OUTPUT_FILE" > "$LOG_FILE" 2>&1
 
-echo "Evaluation completed for model type: $MODEL_TYPE"
+echo
+
+echo "----------------------------------------"
+echo "Evaluation completed for model type: $MODEL_TYPE, eval type: $EVAL_TYPE"
 echo "Results saved to: $OUTPUT_FILE"
 echo "Log file: $LOG_FILE"
