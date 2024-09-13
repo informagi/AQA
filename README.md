@@ -163,7 +163,7 @@ export LOG_DIR=$(mkdir -p "../LOGS/Evaluation/IndividualAgents/$EVAL_TYPE/$(date
 ./run_evaluation.sh
 ```
 <br>
-To view the overall scores check the OUTPUT_DIR and to check the per sample evaluation check the LOG_DIR.
+To view the overall scores check the `OUTPUT_DIR` and to check the per sample evaluation check the `LOG_DIR`.
 <br>
 To Visualize the scores use the `visualize_results.py` script and feed the score files paths to it. 
 
