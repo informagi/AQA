@@ -159,6 +159,7 @@ export OUTPUT_DIR=$(mkdir -p "../Evaluation/IndividualAgents/$EVAL_TYPE" && real
 export MODEL_TYPE="NoR" # or oner or ircot 
 export LOG_DIR=$(mkdir -p "../LOGS/Evaluation/IndividualAgents/$EVAL_TYPE/$(date +'%Y-%m-%d')" && realpath "../LOGS/Evaluation/IndividualAgents/$EVAL_TYPE/$(date +'%Y-%m-%d')")
 
+
 ./run_evaluation.sh
 ```
 <br>
