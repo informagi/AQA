@@ -159,18 +159,22 @@ export OUTPUT_DIR=$(mkdir -p "../Evaluation/IndividualAgents/$EVAL_TYPE" && real
 export MODEL_TYPE="NoR" # or oner or ircot 
 export LOG_DIR=$(mkdir -p "../LOGS/Evaluation/IndividualAgents/$EVAL_TYPE/$(date +'%Y-%m-%d')" && realpath "../LOGS/Evaluation/IndividualAgents/$EVAL_TYPE/$(date +'%Y-%m-%d')")
 
-
 ./run_evaluation.sh
 ```
-<br>
-To view the overall scores check the `OUTPUT_DIR` and to check the per sample evaluation check the `LOG_DIR`.
-<br>
+
+To view the overall scores check the  `OUTPUT_DIR` and to check the per sample evaluation check the `LOG_DIR`.
 To Visualize the scores use the `visualize_results.py` script and feed the score files paths to it. 
 
 
 ## 2.3. AQA Train and Evaluation
+First to prepare train and test files, run the script `Adaptive-RAG/preprocess_results_for_CMAB_experiments.ipynb`. The resulting test and train files are in the format suitable for CMAB experiments.
+
 Use `CMAB_last.py` and `CMAB_last_swarm.py` scripts to train and the relevant evaluation scripts for assessment. 
 
+
+```bash
+python CMAB_last.py ./Results/processed_data_for_CMAB/train_aware_210_51_complete.jsonl LOGS/CMAB_Ind/logss.txt
+```
 ## 2.4. GPTSwarm Train and Evaluation
 Necessary changes are made to `GPTSwarm` repository to support our graph design. You can run `run_aqa.py` script to train and evaluate GPTSwarm to compare it with AQA.
 
