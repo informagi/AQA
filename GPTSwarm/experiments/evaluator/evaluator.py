@@ -17,6 +17,13 @@ from swarm.graph.swarm import Swarm
 from experiments.evaluator.datasets.base_dataset import BaseDataset
 from experiments.evaluator.accuracy import Accuracy
 
+# set random seed as 42
+import random
+random.seed(42)
+# torch.backends.cudnn.deterministic = True
+# torch.backends.cudnn.benchmark = False
+import numpy as np
+np.random.seed(42)
 
 class Evaluator():
     def __init__(
@@ -75,7 +82,7 @@ class Evaluator():
 
             print("Raw answer:", raw_answer)
             answer = dataset.postprocess_answer(raw_answer)
-            print("Postprocessed answer:", answer)
+            # print("Postprocessed answer:", answer)
             correct_answer = dataset.record_to_target_answer(record)
             accuracy.update(answer, correct_answer)
             accuracy.print()
@@ -151,6 +158,8 @@ class Evaluator():
 
                 input_dict = dataset.record_to_swarm_input(record)
                 print(input_dict)
+                # print(f"Realized graph: {type(realized_graph)}{realized_graph}")
+                # print(f"REALIZED GRAPH NODES: {realized_graph.graphs}")
 
                 future_answer = self._swarm.arun(input_dict, realized_graph)
                 future_answers.append(future_answer)
@@ -214,7 +223,11 @@ class Evaluator():
 
         print(f"Optimizing swarm on {dataset.__class__.__name__} split {dataset.split}")
 
+        
+
         optimizer = torch.optim.Adam(self._swarm.connection_dist.parameters(), lr=lr)
+
+        print(f"Optimizing swarm with lr={lr}, batch_size={batch_size}, num_iters={num_iters}")
 
         if self._art_dir_name is not None:
             hp_json_name = os.path.join(self._art_dir_name, "hp.json")
@@ -224,6 +237,7 @@ class Evaluator():
                                num_iters=num_iters,
                                model_name=self._model_name
                                ), f)
+        print("Start training")
 
         def infinite_data_loader() -> Iterator[pd.DataFrame]:
             perm = np.random.permutation(len(dataset))
@@ -231,9 +245,9 @@ class Evaluator():
                 for idx in perm:
                     record = dataset[idx.item()]
                     yield record
-
+        print("Infinite data loader created")
         loader = infinite_data_loader()
-
+        print("Loader created")
         edge_probs = None
         for i_iter in range(num_iters):
             print(f"Iter {i_iter}", 80*'-')
@@ -245,13 +259,20 @@ class Evaluator():
             correct_answers = []
             for i_record, record in zip(range(batch_size), loader):
 
+                print(f"Record {i_record}")
+                print(f"Record: {record}")
+                print(f"Realizing graph")
+
                 realized_graph, log_prob = self._swarm.connection_dist.realize(
                     self._swarm.composite_graph,
                     # temperature=3.0, # DEBUG
                     )
+                print(f"Realized graph")
 
                 input_dict = dataset.record_to_swarm_input(record)
+                print(f"Input dict: {input_dict}")
                 answer = self._swarm.arun(input_dict, realized_graph)
+                print(f"Answer: {answer}")
                 future_answers.append(answer)
                 log_probs.append(log_prob)
                 correct_answer = dataset.record_to_target_answer(record)

@@ -167,7 +167,7 @@ To Visualize the scores use the `visualize_results.py` script and feed the score
 
 
 ## 2.3. AQA Train and Evaluation
-First to prepare train and test files, run the script `Adaptive-RAG/preprocess_results_for_CMAB_experiments.ipynb`. The resulting test and train files are in the format suitable for CMAB experiments.
+First to prepare train and test files, run the script `Adaptive-RAG/preprocess_results_for_CMAB_and_GPTSwarm_experiments.ipynb`. The resulting test and train files are in the format suitable for CMAB experiments.
 
 Use `CMAB_last.py` and `CMAB_last_swarm.py` scripts to train and the relevant evaluation scripts for assessment. 
 
