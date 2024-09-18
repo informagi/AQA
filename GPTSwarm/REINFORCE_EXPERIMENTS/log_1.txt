@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/home/mhoveyda/AdaptiveQA/GPTSwarm/experiments/run_aqa.py", line 7, in <module>
+    from experiments.evaluator.evaluator import Evaluator
+  File "/home/mhoveyda/AdaptiveQA/GPTSwarm/experiments/evaluator/evaluator.py", line 18, in <module>
+    from experiments.evaluator.accuracy import Accuracy
+  File "/home/mhoveyda/AdaptiveQA/GPTSwarm/experiments/evaluator/accuracy.py", line 22, in <module>
+    from evaluator.squad_answer_em_f1 import SquadAnswerEmF1Metric, normalize_answer
+  File "/home/mhoveyda/AdaptiveQA/GPTSwarm/experiments/evaluator/squad_answer_em_f1.py", line 8, in <module>
+    import ftfy
+  File "/home/mhoveyda/.conda/envs/swarm/lib/python3.10/site-packages/ftfy/__init__.py", line 27, in <module>
+    from ftfy import chardata, fixes
+  File "/home/mhoveyda/.conda/envs/swarm/lib/python3.10/site-packages/ftfy/chardata.py", line 82, in <module>
+    HTML_ENTITIES = _build_html_entities()
+  File "/home/mhoveyda/.conda/envs/swarm/lib/python3.10/site-packages/ftfy/chardata.py", line 73, in _build_html_entities
+    if name == name.lower():
+KeyboardInterrupt
