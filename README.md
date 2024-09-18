@@ -181,6 +181,15 @@ python CMAB_last_swarm.py ./Results/processed_data_for_CMAB/train_aware_210_51_c
 ```
 
 ## 2.4. GPTSwarm Train and Evaluation
-Necessary changes are made to `GPTSwarm` repository to support our graph design. You can run `run_aqa.py` script to train and evaluate GPTSwarm to compare it with AQA.
+Necessary changes are made to `GPTSwarm` repository to support our graph design. Run the following script to train and evaluate GPTSwarm and compare it with AQA;
+
+```bash
+cd GPTSwarm
+conda create -n swarm python=3.10
+conda activate swarm
+pip install poetry
+poetry install
+PYTHONPATH=. python experiments/run_aqa.py > ../LOGS/GPTSwarm/logs.txt 2>&1
+```
 
 - - - 
