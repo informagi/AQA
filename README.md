@@ -175,6 +175,11 @@ Use `CMAB_last.py` and `CMAB_last_swarm.py` scripts to train and the relevant ev
 ```bash
 python CMAB_last.py ./Results/processed_data_for_CMAB/train_aware_210_51_complete.jsonl LOGS/CMAB_Ind/logss.txt
 ```
+
+```bash
+python CMAB_last_swarm.py ./Results/processed_data_for_CMAB/train_aware_210_51_complete.jsonl ./Results/processed_data_for_CMAB/test_aware_210_51_complete.jsonl LOGS/CMAB_Swarm/logs.txt
+```
+
 ## 2.4. GPTSwarm Train and Evaluation
 Necessary changes are made to `GPTSwarm` repository to support our graph design. You can run `run_aqa.py` script to train and evaluate GPTSwarm to compare it with AQA.
 

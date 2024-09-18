@@ -23,7 +23,7 @@ args = parser.parse_args()
 logging.basicConfig(filename=args.log_file_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
 
 # Log the start of the process
-logging.info("Starting the CMAB script")
+logging.info("Starting Contextual Multi-Armed Bandit (CMAB) experiments for Individual (no Swarm) setting.")
 
 
 plt.rcParams.update({'font.size': 16})  

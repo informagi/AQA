@@ -3,20 +3,44 @@ import numpy as np
 import json
 import time
 import os
+import sys
 import matplotlib.pyplot as plt
 import seaborn as sns
 import random
 import pandas as pd
 from collections import defaultdict
-from metrics.squad_answer_em_f1 import SquadAnswerEmF1Metric  #
-from collections import Counter
+# Get the path to the Adaptive-RAG folder
+adaptive_rag_path = os.path.join(os.path.dirname(__file__), 'Adaptive-RAG')
 
+# Add the Adaptive-RAG path to the Python system path
+sys.path.append(adaptive_rag_path)
+from metrics.squad_answer_em_f1 import SquadAnswerEmF1Metric  
+from collections import Counter
+import argparse
+import logging
+
+
+# Argument Parsing
+parser = argparse.ArgumentParser(description="Run Contextual Multi-Armed Bandit (CMAB) experiments.")
+parser.add_argument("training_data_path", type=str, help="Path to the training data JSONL file.")
+parser.add_argument("test_data_path", type=str, help="Path to the test data JSONL file.")
+parser.add_argument("log_file_path", type=str, help="Path to save the log file.")
+
+
+args = parser.parse_args()
+
+logging.basicConfig(filename=args.log_file_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
+
+logging.info("Starting Contextual Multi-Armed Bandit (CMAB) experiments for Swarm setting.")
+print(f"Training data path: {args.training_data_path}")
+print(f"Test data path: {args.test_data_path}")
+print(f"Log file path: {args.log_file_path}")
 
 # def reset_random_seeds():
 # os.environ['PYTHONHASHSEED'] = str(42)
 random.seed(42)
 np.random.seed(42)
-print(f"Random seeds reset to 42.")
+logging.info(f"Random seeds reset to 42.")
 
 # reset_random_seeds()  
 
@@ -32,22 +56,29 @@ PERFORMANCE_WEIGHT = 1
 TIME_PENALTY = 0.01
 
 # training_data_path = "/home/mhoveyda/AdaptiveQA/Adaptive-RAG/DATA_FOR_CMAB/Train_Data_For_CMAB.json"
-training_data_path = "/home/mhoveyda/AdaptiveQA/Adaptive-RAG/DATA_FOR_CMAB/Train_Data_For_CMAB_augmented_with_confidence.json"
-test_data_path = "/home/mhoveyda/AdaptiveQA/Adaptive-RAG/DATA_FOR_CMAB/Test_Data_For_CMAB_augmented_with_confidence.json"
+# training_data_path = "/home/mhoveyda/AdaptiveQA/Adaptive-RAG/DATA_FOR_CMAB/Train_Data_For_CMAB_augmented_with_confidence.json"
+# training_data_path = "./Results/processed_data_for_CMAB/train_aware_210_51_complete.jsonl"
+# test_data_path = "./Results/processed_data_for_CMAB/test_aware_210_51_complete.jsonl"
+training_data_path = args.training_data_path
+test_data_path = args.test_data_path
+
 # Create the CMAB folder filename based on the parameters
 # CMAB_figures_folder_filename = f"CMAB_figures_alpha_{ALPHA}_epochs_{EPOCHS}_reward_with_Performance_{PERFORMANCE_IN_REWARD}_{PERFORMANCE_WEIGHT}_time_{TIME_IN_REWARD}_{TIME_WEIGHT}_AdaptiveTimePenalty_{ADAPTIVE_TIME_PENALTY}_confidence_{CONFIDENCE_IN_REWARD}_{CONFIDENCE_WEIGHT}"
 # CMAB_Figures = f"/home/mhoveyda/AdaptiveQA/Adaptive-RAG/CMAB_Swarm_FIGS/12-June/{CMAB_figures_folder_filename}"
 
 # Create the CMAB folder filename based on the parameters
-date_with_time = time.strftime("%d-%b-%Y_%H-%M-%S")
-CMAB_figures_folder_filename = f"CMAB_figures_alpha_{ALPHA}_epochs_{EPOCHS}_reward_with_Performance_{PERFORMANCE_WEIGHT}_time_{TIME_IN_REWARD}"
-CMAB_Figures = f"/home/mhoveyda/AdaptiveQA/Adaptive-RAG/CMAB_Swarm_FIGS/24-June/{date_with_time}/{CMAB_figures_folder_filename}"
+# date_with_time = time.strftime("%d-%b-%Y_%H-%M-%S")
+# CMAB_figures_folder_filename = f"CMAB_figures_alpha_{ALPHA}_epochs_{EPOCHS}_reward_with_Performance_{PERFORMANCE_WEIGHT}_time_{TIME_IN_REWARD}"
+# CMAB_Figures = f"/home/mhoveyda/AdaptiveQA/Adaptive-RAG/CMAB_Swarm_FIGS/24-June/{date_with_time}/{CMAB_figures_folder_filename}"
+date_time = time.strftime("%d-%b")
+CMAB_Figures = f"./Results/CMAB_Swarm_FIGS/{date_time}"
 
-path_to_evaluation_results_folder = {
-    "NoR":"/home/mhoveyda/AdaptiveQA/Agents_Executed_Final_Evaluation_Results/output_results_nor.json",
-    "OneR":"/home/mhoveyda/AdaptiveQA/Agents_Executed_Final_Evaluation_Results/output_results_oner.json",
-    "IRCoT":"/home/mhoveyda/AdaptiveQA/Agents_Executed_Final_Evaluation_Results/output_results_ircot.json"
-}
+# path_to_evaluation_results_folder = {
+#     "nor":"/home/mhoveyda/AdaptiveQA/Agents_Executed_Final_Evaluation_Results/output_results_nor.json",
+#     "oner":"/home/mhoveyda/AdaptiveQA/Agents_Executed_Final_Evaluation_Results/output_results_oner.json",
+#     "ircot":"/home/mhoveyda/AdaptiveQA/Agents_Executed_Final_Evaluation_Results/output_results_ircot.json"
+# }
+
 
 
 
@@ -58,6 +89,7 @@ if not os.path.exists(CMAB_Figures):
     os.makedirs(CMAB_Figures)
 
 
+
 def load_data(filepath):
     data = []
     with open(filepath, 'r') as file:
@@ -66,7 +98,7 @@ def load_data(filepath):
 
     # if DEBUG:
     #     data = data[:10]
-    #     print(f"\n\nSuccessfully loaded data from {filepath}.")
+    #     logging.info(f"\n\nSuccessfully loaded data from {filepath}.")
 
 
     return data
@@ -84,18 +116,18 @@ def majority_vote(answers):
     return sorted_items[0][0]
 
 def calculate_reward(performance_score, time_taken, time_in_reward):
-    print(f"Performance score: {performance_score}, Time taken: {time_taken}, Time in reward: {time_in_reward}")
+    logging.info(f"Performance score: {performance_score}, Time taken: {time_taken}, Time in reward: {time_in_reward}")
 
     if time_taken<=1:
         time_penalty = 0
-    elif time_taken>1 and time_taken<=10: # Since the time is np.log(milliseconds) this takes effect for both NoR and OneR
+    elif time_taken>1 and time_taken<=10: # Since the time is np.log(milliseconds) this takes effect for both nor and oner
     # else:
         time_penalty = 0.0001
-        # print(f"Time less than 10: {time_taken}")   
+        # logging.info(f"Time less than 10: {time_taken}")   
     
-    elif time_taken>10: # Since the time is np.log(milliseconds) this takes effect for IRCoT and any combined configuration
+    elif time_taken>10: # Since the time is np.log(milliseconds) this takes effect for ircot and any combined configuration
         time_penalty = 0.02
-        # print(f"Time greater than 10: {time_taken}")
+        # logging.info(f"Time greater than 10: {time_taken}")
     # time_penalty = TIME_PENALTY if time_taken >= 1 else 0
     # return PERFORMANCE_WEIGHT  * performance_score - (time_penalty * time_taken if time_in_reward else 0)
 
@@ -110,55 +142,57 @@ class DecisionGraph:
 
         self.configurations = [tuple((i >> j) & 1 for j in range(2, -1, -1)) for i in range(1, 8)]
 
-        print(f"Configurations: {self.configurations}")
-        self.agent_map = {0: 'NoR', 1: 'OneR', 2: 'IRCoT'}
+        logging.info(f"Configurations: {self.configurations}")
+        self.agent_map = {0: 'nor', 1: 'oner', 2: 'ircot'}
     
     def execute_graph(self, config_index, data):
         config = self.configurations[config_index]
-        print(f"\n Graph config: {config}")
+        logging.info(f"\n Graph config: {config}")
         connected_agents = [i for i in range(3) if config[i]]
         connected_agents_names = [self.agent_map[agent] for agent in connected_agents]  # List of agent names
-        print(f"Connected agents: {connected_agents_names}")
-        print(f"Count of connected agents: {len(connected_agents)}")
+        logging.info(f"Connected agents: {connected_agents_names}")
+        logging.info(f"Count of connected agents: {len(connected_agents)}")
 
         answers = []
         f1_scores = []
         times = []
-        confidences = []
+        # confidences = []
         
         for agent in connected_agents:
             agent_key = self.agent_map[agent]
-            # print(f"Agent key: {agent_key}")
+            # logging.info(f"Agent key: {agent_key}")
             
             answers.append(data[f'{agent_key}_predicted_answer'])
             f1_scores.append(data[f'{agent_key}_evaluation_results']['f1'])
             # turn to ms and get the log
-            times.append(np.log(data[f'{agent_key}_total_run_time_in_seconds']*1000))
-            # times.append(data[f'{agent_key}_total_run_time_in_seconds'])
-            # times.append(np.log(data[f'{agent_key}_total_run_time_in_seconds']))
-            confidences.append(data[f'{agent_key}_average_confidence_score_of_the_last_subkey'])
+            times.append(np.log(data[f'{agent_key}_time_taken']*1000))
+            # times.append(data[f'{agent_key}_time_taken'])
+            # times.append(np.log(data[f'{agent_key}_time_taken']))
+            # confidences.append(data[f'{agent_key}_average_confidence_score_of_the_last_subkey'])
 
-            print(f"Agent: {agent_key}, Answer: {answers[-1]}, F1 Score: {f1_scores[-1]}, Time: {times[-1]}, Confidence: {confidences[-1]}")
+            logging.info(f"Agent: {agent_key}, Answer: {answers[-1]}, F1 Score: {f1_scores[-1]}, Time: {times[-1]}")
     
-        # print(f"Answers: {answers}")
-        # print(f"F1 scores: {f1_scores}")
-        # print(f"Times: {times}")
-        # print(f"Confidences: {confidences}")
+        # logging.info(f"Answers: {answers}")
+        # logging.info(f"F1 scores: {f1_scores}")
+        # logging.info(f"Times: {times}")
+        # logging.info(f"Confidences: {confidences}")
 
         # # Majority vote
         # final_answer = max(set(answers), key=answers.count)
         final_answer = majority_vote(answers)
 
-        print(f"Final answer: {final_answer}\n")
+        logging.info(f"Final answer: {final_answer}\n")
         total_time = sum(times)
         # Filter confidences for agents whose answers match the majority vote
-        majority_confidences = [confidences[i] for i, answer in enumerate(answers) if answer == final_answer]
-        average_confidence = sum(majority_confidences) / len(majority_confidences) if majority_confidences else 0
+        # majority_confidences = [confidences[i] for i, answer in enumerate(answers) if answer == final_answer]
+        # average_confidence = sum(majority_confidences) / len(majority_confidences) if majority_confidences else 0
 
-        # print(f"Final answer: {final_answer}")
-        # print(f"Total time: {total_time}")
-        # print(f"Average confidence (only from majority): {average_confidence}")
-        return final_answer, total_time, average_confidence, connected_agents_names
+        # logging.info(f"Final answer: {final_answer}")
+        # logging.info(f"Total time: {total_time}")
+        # logging.info(f"Average confidence (only from majority): {average_confidence}")
+        # return final_answer, total_time, average_confidence, connected_agents_names
+        return final_answer, total_time, connected_agents_names
+
     
     def get_num_configurations(self):
         return len(self.configurations)
@@ -217,6 +251,7 @@ def evaluate_graph_configurations(data, graph):
             "overall": overall_metrics,
             "by_complexity": complexity_results
         }
+
 def save_results(results_dict, output_path):
     with open(output_path, "w") as file:
         json.dump(results_dict, file, indent=4)
@@ -281,13 +316,13 @@ def plot_metrics(df, metric_name, title, ylabel, output_directory):
 def plot_expected_rewards(linucb):
     complexity_labels = ['A', 'B', 'C']
     configurations = [(0, 0, 1), (0, 1, 0), (0, 1, 1), (1, 0, 0), (1, 0, 1), (1, 1, 0), (1, 1, 1)]
-    agent_map = {0: 'NoR', 1: 'OneR', 2: 'IRCoT'}
+    agent_map = {0: 'nor', 1: 'oner', 2: 'ircot'}
     configuration_labels = [
         '+'.join([agent_map[idx] for idx, present in enumerate(config) if present])
         for config in configurations
     ]
 
-    print(f"Configuration Labels: {configuration_labels}")
+    logging.info(f"Configuration Labels: {configuration_labels}")
 
     for label in complexity_labels:
         plt.figure(figsize=(10, 8))
@@ -302,7 +337,7 @@ def plot_expected_rewards(linucb):
             if rewards:  # Only plot if there  rewards to plot
                 plt.plot(rewards, label=f'{config_label} (Config {config_index + 1})')
             else:
-                print(f"No rewards data for {config_label} with Complexity {label}")
+                logging.info(f"No rewards data for {config_label} with Complexity {label}")
 
         plt.title(f'Evolution of Expected Rewards for Complexity {label}')
         plt.xlabel('Time Step')
@@ -320,7 +355,7 @@ def plot_combined_contextual_rewards(time_based_data, non_time_based_data, save_
     context_labels = ['A', 'B', 'C']  
 
     configurations = [(0, 0, 1), (0, 1, 0), (0, 1, 1), (1, 0, 0), (1, 0, 1), (1, 1, 0), (1, 1, 1)]
-    agent_map = {0: 'NoR', 1: 'OneR', 2: 'IRCoT'}
+    agent_map = {0: 'nor', 1: 'oner', 2: 'ircot'}
     arm_labels = ['+'.join([agent_map[idx] for idx, present in enumerate(config) if present]) for config in configurations]
 
     datasets = [non_time_based_data, time_based_data]
@@ -354,39 +389,39 @@ def plot_combined_contextual_rewards(time_based_data, non_time_based_data, save_
                 #                 if row_index == 0:
                 if row_index == 0:
                     if context_index == 0:
-                        if arm_labels[arm_index] == "NoR":
-                            print(f"{row_index=}, {context_index=}, {arm_labels[arm_index]=}")
+                        if arm_labels[arm_index] == "nor":
+                            logging.info(f"{row_index=}, {context_index=}, {arm_labels[arm_index]=}")
 
                             ax.axhline(y=np.mean([reward for arm, reward, context in rewards_history if arm == arm_index and context == context_index]), color='r', linestyle='--')
 
 
                     elif context_index == 1:
-                        if arm_labels[arm_index] == "IRCoT":
-                            print(f"{row_index=}, {context_index=}, {arm_labels[arm_index]=}")
+                        if arm_labels[arm_index] == "ircot":
+                            logging.info(f"{row_index=}, {context_index=}, {arm_labels[arm_index]=}")
 
                             ax.axhline(y=np.mean([reward for arm, reward, context in rewards_history if arm == arm_index and context == context_index]), color='r', linestyle='--')
 
 
                     elif context_index == 2:
-                        if arm_labels[arm_index] == "IRCoT":
-                            print(f"{row_index=}, {context_index=}, {arm_labels[arm_index]=}")
+                        if arm_labels[arm_index] == "ircot":
+                            logging.info(f"{row_index=}, {context_index=}, {arm_labels[arm_index]=}")
 
                             ax.axhline(y=np.mean([reward for arm, reward, context in rewards_history if arm == arm_index and context == context_index]), color='r', linestyle='--')
 
 
                 if row_index == 1:
                     if context_index == 0:
-                        if arm_labels[arm_index] == "NoR":
-                            print(f"{row_index=}, {context_index=}, {arm_labels[arm_index]=}")
+                        if arm_labels[arm_index] == "nor":
+                            logging.info(f"{row_index=}, {context_index=}, {arm_labels[arm_index]=}")
                             ax.axhline(y=np.mean([reward for arm, reward, context in rewards_history if arm == arm_index and context == context_index]), color='r', linestyle='--')
                     elif context_index == 1:
-                        if arm_labels[arm_index] == "OneR":
-                            print(f"{row_index=}, {context_index=}, {arm_labels[arm_index]=}")
+                        if arm_labels[arm_index] == "oner":
+                            logging.info(f"{row_index=}, {context_index=}, {arm_labels[arm_index]=}")
                             ax.axhline(y=np.mean([reward for arm, reward, context in rewards_history if arm == arm_index and context == context_index]), color='r', linestyle='--')
                     elif context_index == 2:
         
-                        if arm_labels[arm_index] == "IRCoT":
-                            print(f"{row_index=}, {context_index=}, {arm_labels[arm_index]=}")
+                        if arm_labels[arm_index] == "ircot":
+                            logging.info(f"{row_index=}, {context_index=}, {arm_labels[arm_index]=}")
                             ax.axhline(y=np.mean([reward for arm, reward, context in rewards_history if arm == arm_index and context == context_index]), color='r', linestyle='--')
 
 
@@ -412,7 +447,7 @@ def plot_combined_contextual_UCSBs(time_based_data, non_time_based_data, save_pa
     context_labels = ['A', 'B', 'C']  
     
     configurations = [(0, 0, 1), (0, 1, 0), (0, 1, 1), (1, 0, 0), (1, 0, 1), (1, 1, 0), (1, 1, 1)]
-    agent_map = {0: 'NoR', 1: 'OneR', 2: 'IRCoT'}
+    agent_map = {0: 'nor', 1: 'oner', 2: 'ircot'}
     arm_labels = ['+'.join([agent_map[idx] for idx, present in enumerate(config) if present]) for config in configurations]
 
     datasets = [non_time_based_data, time_based_data]
@@ -464,7 +499,7 @@ def plot_combined_action_distributions(time_based_data, non_time_based_data, sav
     fig, axs = plt.subplots(2, 3, figsize=(18, 10), sharey=True)  # Removed sharex=True
 
     configurations = [(0, 0, 1), (0, 1, 0), (0, 1, 1), (1, 0, 0), (1, 0, 1), (1, 1, 0), (1, 1, 1)]
-    agent_map = {0: 'NoR', 1: 'OneR', 2: 'IRCoT'}
+    agent_map = {0: 'nor', 1: 'oner', 2: 'ircot'}
     arm_labels = ['+'.join([agent_map[idx] for idx, present in enumerate(config) if present]) for config in configurations]
 
     datasets = [non_time_based_data, time_based_data]
@@ -510,6 +545,62 @@ def plot_combined_action_distributions(time_based_data, non_time_based_data, sav
     plt.close()
 
 
+def evaluate_and_save_results(graph, linucb_model, test_data_path, results_path):
+    test_data = load_data(test_data_path)
+    
+    complexities = defaultdict(list)
+
+    start_time = time.time()
+    
+    for instance in test_data:
+        complexity = instance['complexity_label']
+        context = np.array(complexity_to_vector(complexity))
+        chosen_arm = linucb_model.select_arm(context)
+        # answer, time_taken, confidence, connected_agents_names = graph.execute_graph(chosen_arm, instance)
+        answer, time_taken, connected_agents_names = graph.execute_graph(chosen_arm, instance)
+
+        ground_truths = instance['gold_answers']
+        
+        metrics = evaluate_single(answer, ground_truths)
+        f1_score = metrics['f1']
+        
+        complexities[complexity].append({
+            "f1_score": f1_score,
+            "time_taken": time_taken,
+            "selected_action": chosen_arm,
+            "connected_agents": connected_agents_names
+        })
+    
+    total_evaluation_time = time.time() - start_time
+    overall_results = []
+
+    for complexity, results in complexities.items():
+        avg_f1 = sum(item["f1_score"] for item in results) / len(results)
+        avg_time = sum(item["time_taken"] for item in results) / len(results)
+        overall_results.extend(results)  # Gather all results for overall metrics
+        complexities[complexity] = results + [
+            {"average_f1_score": avg_f1, "average_time": avg_time}
+        ]
+
+    if overall_results:
+        overall_avg_f1 = sum(item["f1_score"] for item in overall_results) / len(overall_results)
+        overall_avg_time = sum(item["time_taken"] for item in overall_results) / len(overall_results)
+        complexities['Overall'] = overall_results + [
+            {"average_f1_score": overall_avg_f1, "average_time": overall_avg_time}
+        ]
+
+    # Construct filename based on model type
+    model_type = "time" if linucb_model.time_in_reward else "notime"
+    results_filename = f"evaluation_results_{model_type}.json"
+
+    results_to_save = {
+        "total_evaluation_time": total_evaluation_time,
+        "results_by_complexity": complexities
+    }
+    with open(os.path.join(results_path, results_filename), "w") as f:
+        json.dump(results_to_save, f, indent=4)
+
+    logging.info(f"Evaluation results saved to: {os.path.join(results_path, results_filename)}")
 
 
 
@@ -534,8 +625,8 @@ class LinUCB:
 
 
 
-        print(f"LinUCB initialized with {n_arms} arms and {n_features} features.")
-        print(f"Shapes: A: {self.A[0].shape}, b: {self.b[0].shape}")
+        logging.info(f"LinUCB initialized with {n_arms} arms and {n_features} features.")
+        logging.info(f"Shapes: A: {self.A[0].shape}, b: {self.b[0].shape}")
 
     def select_arm(self, context):
         UCBs = []
@@ -583,12 +674,12 @@ class LinUCB:
     def get_train_matrices(self):
         n_time_steps = len(self.context_history)
 
-        print(f"\n")
+        logging.info(f"\n")
 
-        print(f"Length of context_history: {len(self.context_history)}")
-        print(f"Length of real_reward_history: {len(self.real_reward_history)}")
-        print(f"Length of expected_reward_matrix_history: {len(self.expected_reward_matrix_history)}, sample: {self.expected_reward_matrix_history[0]}")
-        print(f"Length of ucb_matrix_history: {len(self.ucb_matrix_history)}, sample: {self.ucb_matrix_history[0]}")
+        logging.info(f"Length of context_history: {len(self.context_history)}")
+        logging.info(f"Length of real_reward_history: {len(self.real_reward_history)}")
+        logging.info(f"Length of expected_reward_matrix_history: {len(self.expected_reward_matrix_history)}, sample: {self.expected_reward_matrix_history[0]}")
+        logging.info(f"Length of ucb_matrix_history: {len(self.ucb_matrix_history)}, sample: {self.ucb_matrix_history[0]}")
 
         context_expected_rewards = np.zeros((self.n_features, self.n_arms, len(self.expected_reward_matrix_history))) # each row is a feature, each column is an arm, each depth is a training time step
         context_ucbs = np.zeros((self.n_features, self.n_arms, len(self.ucb_matrix_history))) # each row is a feature, each column is an arm, each depth is a training time step
@@ -613,7 +704,9 @@ class LinUCB:
             for i, instance in enumerate(training_data):
                 context = np.array(complexity_to_vector(instance['complexity_label']))
                 chosen_arm = self.select_arm(context)
-                answer, time_taken, confidence, connected_agents_names = graph.execute_graph(chosen_arm, instance)
+                # answer, time_taken, confidence, connected_agents_names = graph.execute_graph(chosen_arm, instance)
+                answer, time_taken, connected_agents_names = graph.execute_graph(chosen_arm, instance)
+
                 ground_truths = instance['gold_answers']
 
                 metrics = evaluate_single(answer, ground_truths)
@@ -636,9 +729,9 @@ linucb_time = LinUCB(graph.get_num_configurations(), n_features, ALPHA, time_in_
 linucb_time.run_train(graph)
 
 time_based_data = linucb_time.get_train_matrices()
-print(f" Length of time_based_data: {len(time_based_data)}")
+logging.info(f" Length of time_based_data: {len(time_based_data)}")
 non_time_based_data = linucb_notime.get_train_matrices()
-print(f" Length of non_time_based_data: {len(non_time_based_data)}")
+logging.info(f" Length of non_time_based_data: {len(non_time_based_data)}")
 
 # write the time_based_data and non_time_based_data to a file in CMAB_Figures folder
 
@@ -668,7 +761,7 @@ for i, data in enumerate(time_based_data):
         filepath = os.path.join(CMAB_Figures, filename)
         np.save(filepath, data)
 
-print(f"\n\n")
+logging.info(f"\n\n")
 for i, data in enumerate(non_time_based_data):
     if i == 0:
         filename = f"non_time_based_expected_rewards.npy"
@@ -688,175 +781,127 @@ for i, data in enumerate(non_time_based_data):
         np.save(filepath, data)
 
 
-path = CMAB_Figures
-if not os.path.exists(path):
-    os.makedirs(path)
+if __name__ == "__main__":
+    try:
+            
+        path = CMAB_Figures
+        if not os.path.exists(path):
+            os.makedirs(path)
 
-plot_combined_contextual_rewards(time_based_data, non_time_based_data, path)
-plot_combined_contextual_UCSBs(time_based_data, non_time_based_data, path)
-plot_combined_action_distributions((linucb_time.action_choice_counts, linucb_time.context_history), (linucb_notime.action_choice_counts, linucb_notime.context_history), path)
-# if __name__ == "__main__":
-#     main()
+        plot_combined_contextual_rewards(time_based_data, non_time_based_data, path)
+        plot_combined_contextual_UCSBs(time_based_data, non_time_based_data, path)
+        plot_combined_action_distributions((linucb_time.action_choice_counts, linucb_time.context_history), (linucb_notime.action_choice_counts, linucb_notime.context_history), path)
+        # if __name__ == "__main__":
+        #     main()
 
-# def evaluate_and_save_results(graph, linucb_model, test_data_path, results_path):
-#     # Load test data
-#     test_data = load_data(test_data_path)
-    
-#     # Initialize metrics collection
-#     f1_scores = []
-#     times = []
+        # def evaluate_and_save_results(graph, linucb_model, test_data_path, results_path):
+        #     # Load test data
+        #     test_data = load_data(test_data_path)
+            
+        #     # Initialize metrics collection
+        #     f1_scores = []
+        #     times = []
 
-#     start_time = time.time()
-    
-#     # Execute the graph for each data point in the test set
-#     for instance in test_data:
-#         context = np.array(complexity_to_vector(instance['complexity_label']))
-#         chosen_arm = linucb_model.select_arm(context)
-#         answer, time_taken, confidence, connected_agents_names = graph.execute_graph(chosen_arm, instance)
-#         ground_truths = instance['gold_answers']
-        
-#         # Calculate metrics
-#         metrics = evaluate_single(answer, ground_truths)
-#         f1_score = metrics['f1']
-        
-#         f1_scores.append(f1_score)
-#         times.append(time_taken)
-    
-#     # Compute the total evaluation time
-#     total_evaluation_time = time.time() - start_time
+        #     start_time = time.time()
+            
+        #     # Execute the graph for each data point in the test set
+        #     for instance in test_data:
+        #         context = np.array(complexity_to_vector(instance['complexity_label']))
+        #         chosen_arm = linucb_model.select_arm(context)
+        #         answer, time_taken, confidence, connected_agents_names = graph.execute_graph(chosen_arm, instance)
+        #         ground_truths = instance['gold_answers']
+                
+        #         # Calculate metrics
+        #         metrics = evaluate_single(answer, ground_truths)
+        #         f1_score = metrics['f1']
+                
+        #         f1_scores.append(f1_score)
+        #         times.append(time_taken)
+            
+        #     # Compute the total evaluation time
+        #     total_evaluation_time = time.time() - start_time
 
-#     # Construct filename based on model type
-#     model_type = "time" if linucb_model.time_in_reward else "notime"
-#     results_filename = f"evaluation_results_{model_type}.json"
+        #     # Construct filename based on model type
+        #     model_type = "time" if linucb_model.time_in_reward else "notime"
+        #     results_filename = f"evaluation_results_{model_type}.json"
 
-#     # Save the results
-#     results = {
-#         "f1_scores": f1_scores,
-#         "times": times,
-#         "total_evaluation_time": total_evaluation_time
-#     }
-#     with open(os.path.join(results_path, results_filename), "w") as f:
-#         json.dump(results, f, indent=4)
+        #     # Save the results
+        #     results = {
+        #         "f1_scores": f1_scores,
+        #         "times": times,
+        #         "total_evaluation_time": total_evaluation_time
+        #     }
+        #     with open(os.path.join(results_path, results_filename), "w") as f:
+        #         json.dump(results, f, indent=4)
 
-#     print(f"Evaluation results saved to: {os.path.join(results_path, results_filename)}")
+        #     logging.info(f"Evaluation results saved to: {os.path.join(results_path, results_filename)}")
 
 
-# def evaluate_and_save_results(graph, linucb_model, test_data_path, results_path):
-#     # Load test data
-#     test_data = load_data(test_data_path)
-    
-#     # Prepare to collect detailed metrics
-#     complexities = defaultdict(list)
+        # def evaluate_and_save_results(graph, linucb_model, test_data_path, results_path):
+        #     # Load test data
+        #     test_data = load_data(test_data_path)
+            
+        #     # Prepare to collect detailed metrics
+        #     complexities = defaultdict(list)
 
-#     start_time = time.time()
-    
-#     # Evaluate each instance
-#     for instance in test_data:
-#         complexity = instance['complexity_label']
-#         context = np.array(complexity_to_vector(complexity))
-#         chosen_arm = linucb_model.select_arm(context)
-#         answer, time_taken, confidence, connected_agents_names = graph.execute_graph(chosen_arm, instance)
-#         ground_truths = instance['gold_answers']
-        
-#         # Calculate metrics
-#         metrics = evaluate_single(answer, ground_truths)
-#         f1_score = metrics['f1']
-        
-#         # Collect data by complexity
-#         complexities[complexity].append({
-#             "f1_score": f1_score,
-#             "time_taken": time_taken,
-#             "selected_action": chosen_arm,
-#             "connected_agents": connected_agents_names
-#         })
-    
-#     # Compute overall metrics
-#     total_evaluation_time = time.time() - start_time
-#     overall_results = []
+        #     start_time = time.time()
+            
+        #     # Evaluate each instance
+        #     for instance in test_data:
+        #         complexity = instance['complexity_label']
+        #         context = np.array(complexity_to_vector(complexity))
+        #         chosen_arm = linucb_model.select_arm(context)
+        #         answer, time_taken, confidence, connected_agents_names = graph.execute_graph(chosen_arm, instance)
+        #         ground_truths = instance['gold_answers']
+                
+        #         # Calculate metrics
+        #         metrics = evaluate_single(answer, ground_truths)
+        #         f1_score = metrics['f1']
+                
+        #         # Collect data by complexity
+        #         complexities[complexity].append({
+        #             "f1_score": f1_score,
+        #             "time_taken": time_taken,
+        #             "selected_action": chosen_arm,
+        #             "connected_agents": connected_agents_names
+        #         })
+            
+        #     # Compute overall metrics
+        #     total_evaluation_time = time.time() - start_time
+        #     overall_results = []
 
-#     # Organize results by complexity and calculate averages
-#     for complexity, results in complexities.items():
-#         avg_f1 = sum(item["f1_score"] for item in results) / len(results)
-#         overall_results.extend(results)  # Gather all results for overall metrics
-#         complexities[complexity] = results + [{"average_f1_score": avg_f1}]
+        #     # Organize results by complexity and calculate averages
+        #     for complexity, results in complexities.items():
+        #         avg_f1 = sum(item["f1_score"] for item in results) / len(results)
+        #         overall_results.extend(results)  # Gather all results for overall metrics
+        #         complexities[complexity] = results + [{"average_f1_score": avg_f1}]
 
-#     # Calculate overall average F1
-#     if overall_results:
-#         overall_avg_f1 = sum(item["f1_score"] for item in overall_results) / len(overall_results)
-#         complexities['Overall'] = overall_results + [{"average_f1_score": overall_avg_f1}]
+        #     # Calculate overall average F1
+        #     if overall_results:
+        #         overall_avg_f1 = sum(item["f1_score"] for item in overall_results) / len(overall_results)
+        #         complexities['Overall'] = overall_results + [{"average_f1_score": overall_avg_f1}]
 
-#     # Construct filename based on model type
-#     model_type = "time" if linucb_model.time_in_reward else "notime"
-#     results_filename = f"evaluation_results_{model_type}.json"
+        #     # Construct filename based on model type
+        #     model_type = "time" if linucb_model.time_in_reward else "notime"
+        #     results_filename = f"evaluation_results_{model_type}.json"
 
-#     # Save the results
-#     results_to_save = {
-#         "total_evaluation_time": total_evaluation_time,
-#         "results_by_complexity": complexities
-#     }
-#     with open(os.path.join(results_path, results_filename), "w") as f:
-#         json.dump(results_to_save, f, indent=4)
+        #     # Save the results
+        #     results_to_save = {
+        #         "total_evaluation_time": total_evaluation_time,
+        #         "results_by_complexity": complexities
+        #     }
+        #     with open(os.path.join(results_path, results_filename), "w") as f:
+        #         json.dump(results_to_save, f, indent=4)
 
-#     print(f"Evaluation results saved to: {os.path.join(results_path, results_filename)}")
+        #     logging.info(f"Evaluation results saved to: {os.path.join(results_path, results_filename)}")
 
-def evaluate_and_save_results(graph, linucb_model, test_data_path, results_path):
-    test_data = load_data(test_data_path)
-    
-    complexities = defaultdict(list)
 
-    start_time = time.time()
-    
-    for instance in test_data:
-        complexity = instance['complexity_label']
-        context = np.array(complexity_to_vector(complexity))
-        chosen_arm = linucb_model.select_arm(context)
-        answer, time_taken, confidence, connected_agents_names = graph.execute_graph(chosen_arm, instance)
-        ground_truths = instance['gold_answers']
-        
-        metrics = evaluate_single(answer, ground_truths)
-        f1_score = metrics['f1']
-        
-        complexities[complexity].append({
-            "f1_score": f1_score,
-            "time_taken": time_taken,
-            "selected_action": chosen_arm,
-            "connected_agents": connected_agents_names
-        })
-    
-    total_evaluation_time = time.time() - start_time
-    overall_results = []
-
-    for complexity, results in complexities.items():
-        avg_f1 = sum(item["f1_score"] for item in results) / len(results)
-        avg_time = sum(item["time_taken"] for item in results) / len(results)
-        overall_results.extend(results)  # Gather all results for overall metrics
-        complexities[complexity] = results + [
-            {"average_f1_score": avg_f1, "average_time": avg_time}
-        ]
-
-    if overall_results:
-        overall_avg_f1 = sum(item["f1_score"] for item in overall_results) / len(overall_results)
-        overall_avg_time = sum(item["time_taken"] for item in overall_results) / len(overall_results)
-        complexities['Overall'] = overall_results + [
-            {"average_f1_score": overall_avg_f1, "average_time": overall_avg_time}
-        ]
-
-    # Construct filename based on model type
-    model_type = "time" if linucb_model.time_in_reward else "notime"
-    results_filename = f"evaluation_results_{model_type}.json"
-
-    results_to_save = {
-        "total_evaluation_time": total_evaluation_time,
-        "results_by_complexity": complexities
-    }
-    with open(os.path.join(results_path, results_filename), "w") as f:
-        json.dump(results_to_save, f, indent=4)
-
-    print(f"Evaluation results saved to: {os.path.join(results_path, results_filename)}")
-
-# Evaluate and save results for the non-time-based model
-evaluate_and_save_results(graph, linucb_notime, test_data_path, CMAB_Figures)
-print("The results for non-time-based model have been saved.")
-# Evaluate and save results for the time-based model
-evaluate_and_save_results(graph, linucb_time, test_data_path, CMAB_Figures)
-print("The results for time-based model have been saved.")
+        # Evaluate and save results for the non-time-based model
+        evaluate_and_save_results(graph, linucb_notime, test_data_path, CMAB_Figures)
+        logging.info("The results for non-time-based model have been saved.")
+        # Evaluate and save results for the time-based model
+        evaluate_and_save_results(graph, linucb_time, test_data_path, CMAB_Figures)
+        logging.info("The results for time-based model have been saved.")
+    except Exception as e:
+        logging.exception(e, exc_info=True)
+        raise e
