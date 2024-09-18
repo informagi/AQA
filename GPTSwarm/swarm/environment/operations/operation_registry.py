@@ -3,7 +3,13 @@ from class_registry import ClassRegistry
 
 from swarm.graph.node import Node
 
-
+# set random seed as 42
+import random
+random.seed(42)
+# torch.backends.cudnn.deterministic = True
+# torch.backends.cudnn.benchmark = False
+import numpy as np
+np.random.seed(42)
 class OperationRegistry:
     registry = ClassRegistry()
 

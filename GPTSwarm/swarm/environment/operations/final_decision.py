@@ -16,6 +16,14 @@ from swarm.utils.globals import Cost
 from swarm.environment.operations.operation_registry import OperationRegistry
 
 
+# set random seed as 42
+import random
+random.seed(42)
+# torch.backends.cudnn.deterministic = True
+# torch.backends.cudnn.benchmark = False
+import numpy as np
+np.random.seed(42)
+
 class MergingStrategy(Enum):
     OutputsAsReferences = 0
     MajorityVote = 1
@@ -87,6 +95,7 @@ class FinalDecision(Node):
             if len(inputs) == 0:
                 raise Exception("No inputs is not supported for MajorityVote")
             answers = [input.get("output") for input in inputs]
+            print(f"Number of answers: {len(answers)}")
             counter = Counter(answers)
             sorted_counter = counter.most_common()
             max_freq = sorted_counter[0][1]

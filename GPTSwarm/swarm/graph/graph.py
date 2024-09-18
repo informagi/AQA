@@ -95,6 +95,31 @@ class Graph(ABC):
 
         self.nodes[node_id] = node
         return node   
+    # def find_connected_predecessors(self, node_id):
+    #     """
+    #     Recursively find all predecessor nodes that connect to the given node.
+    #     """
+    #     node_stack = [node_id]
+    #     connected_predecessors = set()
+
+    #     while node_stack:
+    #         current_node_id = node_stack.pop()
+    #         current_node = self.nodes[current_node_id]
+    #         predecessors = current_node.predecessors
+    #         for pred in predecessors:
+    #             if pred.id not in connected_predecessors:
+    #                 connected_predecessors.add(pred.id)
+    #                 node_stack.append(pred.id)
+    #     return connected_predecessors
+    def find_immediate_predecessors(self, node_id):
+        """
+        Find immediate predecessor nodes that connect directly to the given node.
+        """
+        if node_id in self.nodes:
+            current_node = self.nodes[node_id]
+            return [pred.id for pred in current_node.predecessors]
+        else:
+            raise Exception(f"Node with ID {node_id} not found in the graph.")
 
     def display(self, draw=True, file_name=None):
         """
@@ -152,8 +177,12 @@ class Graph(ABC):
                         zero_in_degree_queue.append(successor.id)
 
         final_answers = []
-
+        print(f"Output nodes: {[node for node in self.output_nodes]}")
         for output_node in self.output_nodes:
+
+            connected_preds_of_output = self.find_immediate_predecessors(output_node.id)
+            print(f"Connected predecessors of output node {output_node.id}: {connected_preds_of_output}")
+
             output_messages = output_node.outputs
             if len(output_messages) > 0 and not return_all_outputs:
                 final_answer = output_messages[-1].get("output", output_messages[-1])

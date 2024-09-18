@@ -22,6 +22,7 @@ from experiments.evaluator.datasets.aqa_dataset import AQADataset
 import random
 import numpy as np
 import torch
+import logging
 # import tensorflow as tf
 
 # Setting the seed for various random number generators
@@ -30,6 +31,10 @@ np.random.seed(42)
 torch.manual_seed(42)
 # tf.random.set_seed(42)
 
+log_file_path = "../LOGS/GPTSwarm/logs.txt"
+
+
+logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filemode='w')
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Process some parameters.")
@@ -60,7 +65,7 @@ def parse_args():
 async def main():
 
     args = parse_args()
-    print(f"\n{{run_witqa.py}} \n\targs: {args}")
+    logging.info(f"\n{{run_witqa.py}} \n\targs: {args}")
 
     debug: bool = args.debug
 
@@ -74,7 +79,7 @@ async def main():
     mode = args.mode
 
     strategy = MergingStrategy.MajorityVote
-    print(f"\n\t{{run_aqa.py}} \n\tstrategy: {strategy}")
+    logging.info(f"\n\t{{run_aqa.py}} \n\tstrategy: {strategy}")
 
     domain: str = args.domain
     
@@ -93,14 +98,14 @@ async def main():
         agent_name_list = N * ["NoRAgent"] + M * ["OneRAgent"] + M * ["IRCoTAgent"]
 
 
-        print(f"\n\t{{run_witqa.py}} \n\tagent_name_list: {agent_name_list}")
+        logging.info(f"\n\t{{run_witqa.py}} \n\tagent_name_list: {agent_name_list}")
 
 
         # swarm_name = f"{N}true_{M}adv"
         # swarm_name = f"{N}true_{M}ture" # Mohanna
         swarm_name = f"{N}NoR_{M}OneR_{M}IRCoT"
 
-        print(f"\n\t{{run_witqa.py}} initializing swarm...")
+        logging.info(f"\n\t{{run_witqa.py}} initializing swarm...")
         swarm = Swarm(
             agent_name_list,
             domain,
@@ -111,12 +116,12 @@ async def main():
         )
 
     tag = f"{domain}_{swarm_name}_{strategy.name}_{mode}"
-    print(f"\n\t{{run_aqa.py}} tag: {tag}")
+    logging.info(f"\n\t{{run_aqa.py}} tag: {tag}")
 
 
-    print(f"\n\t{{run_aqa.py}} Loading train (dev)")
+    logging.info(f"\n\t{{run_aqa.py}} Loading train (dev)")
     dataset_train = AQADataset('dev')
-    print(f"\n\t{{run_witqa.py}} Loading val")
+    logging.info(f"\n\t{{run_witqa.py}} Loading val")
     dataset_val = AQADataset('val')
 
 
@@ -132,39 +137,39 @@ async def main():
     limit_questions = 2 if debug else 210
     # # # limit_questions = 1 if debug else 153
 
-    print(f"\n\t{{run_witqa.py}} limit_questions: {limit_questions}")
+    logging.info(f"\n\t{{run_witqa.py}} limit_questions: {limit_questions}")
 
     if mode == 'DirectAnswer':
-        print(f"\n\t{{run_witqa.py}} evaluating direct answer...")
+        logging.info(f"\n\t{{run_witqa.py}} evaluating direct answer...")
         score = await evaluator.evaluate_direct_answer(
             limit_questions=limit_questions)
         
     elif mode == 'FullConnectedSwarm':
-        print(f"\n\t{{run_witqa.py}} evaluating full connected swarm...")
+        logging.info(f"\n\t{{run_witqa.py}} evaluating full connected swarm...")
         score = await evaluator.evaluate_swarm(
             mode='full_connected_swarm',
             limit_questions=limit_questions)
         
 
     elif mode == 'RandomSwarm':
-        print(f"\n\t{{run_witqa.py}} evaluating random swarm...")
+        logging.info(f"\n\t{{run_witqa.py}} evaluating random swarm...")
         score = await evaluator.evaluate_swarm(
             mode='randomly_connected_swarm',
             limit_questions=limit_questions)
         
     elif mode == 'OptimizedSwarm':
-        print(f"\n\t{{run_witqa.py}} optimizing swarm...")
+        logging.info(f"\n\t{{run_witqa.py}} optimizing swarm...")
 
         # num_iters = 5 if debug else args.num_iterations
         num_iters = 1 if debug else args.num_iterations
 
-        print(f"\n\t{{run_witqa.py}} num_iters: {num_iters}")
+        logging.info(f"\n\t{{run_witqa.py}} num_iters: {num_iters}")
 
         lr = 0.1
 
         edge_probs = await evaluator.optimize_swarm(num_iters=num_iters, lr=lr)
-        print(f"\n\t{{run_witqa.py}} edge_probs: \n{edge_probs}")
-        print(f"\n\t{{run_witqa.py}} evaluating swarm with optimized edge_probs...")
+        logging.info(f"\n\t{{run_witqa.py}} edge_probs: \n{edge_probs}")
+        logging.info(f"\n\t{{run_witqa.py}} evaluating swarm with optimized edge_probs...")
         score = await evaluator.evaluate_swarm(
             mode='external_edge_probs',
             edge_probs=edge_probs,
@@ -174,9 +179,13 @@ async def main():
     else:
         raise Exception(f"Unsupported mode {mode}")
 
-    print(f"Score: {score}")
+    logging.info(f"Score: {score}")
 
 
 if __name__ == "__main__":
-    print(f"{{run_aqa.py}}")
-    asyncio.run(main())
+    logging.info(f"{{run_aqa.py}}")
+    try:
+        asyncio.run(main())
+    except Exception as e:
+        logging.error(f"Exception: {e}", exc_info=True)
+        raise e

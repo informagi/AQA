@@ -11,6 +11,13 @@ from swarm.graph.node import Node
 from swarm.graph.graph import Graph
 from swarm.graph.composite_graph import CompositeGraph
 
+# set random seed as 42
+import random
+random.seed(42)
+# torch.backends.cudnn.deterministic = True
+# torch.backends.cudnn.benchmark = False
+import numpy as np
+np.random.seed(42)
 
 class ConnectDistribution(nn.Module):
     def __init__(self, potential_connections):

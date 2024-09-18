@@ -17,6 +17,14 @@ from swarm.environment.agents import AgentRegistry
 from swarm.environment.operations.operation_registry import OperationRegistry
 
 
+# set random seed as 42
+import random
+random.seed(42)
+# torch.backends.cudnn.deterministic = True
+# torch.backends.cudnn.benchmark = False
+import numpy as np
+np.random.seed(42)
+
 class Swarm:
     """
     A class representing a swarm in the GPTSwarm framework.

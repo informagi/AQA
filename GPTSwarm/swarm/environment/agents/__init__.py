@@ -11,6 +11,17 @@ from swarm.environment.agents.gaia.web_io import WebIO
 from swarm.environment.agents.gaia.tool_tot import ToolTOT
 from swarm.environment.agents.gaia.normal_io import NormalIO
 from swarm.environment.agents.humaneval.code_io import CodeIO
+from swarm.environment.agents.nor import NoRAgent
+from swarm.environment.agents.oner import OneRAgent
+from swarm.environment.agents.ircot import IRCoTAgent
+
+# set random seed as 42
+import random
+random.seed(42)
+# torch.backends.cudnn.deterministic = True
+# torch.backends.cudnn.benchmark = False
+import numpy as np
+np.random.seed(42)
 # from swarm.environment.agents.humaneval.code_reflection import CodeReflection
 
 __all__ = [
@@ -27,4 +38,7 @@ __all__ = [
     "NormalIO",
     "WebIO",
     "CodeIO",
+    "NoRAgent",
+    "OneRAgent",
+    "IRCoTAgent"
 ]
