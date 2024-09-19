@@ -14,8 +14,6 @@ $ conda create -n AQA python=3.8
 $ conda activate AQA
 $ git clone https://github.com/informagi/AQA.git
 $ cd AQA
-$ git clone https://github.com/starsuzi/Adaptive-RAG.git
-$ cd Adaptive-RAG
 $ pip install torch==1.13.1+cu117 --extra-index-url https://download.pytorch.org/whl/cu117
 $ pip install -r requirements.txt
 ```
@@ -23,6 +21,7 @@ $ pip install -r requirements.txt
 ### 1.1. Servers
 The retrieval server is necessary for the agents that use retrieval (IR and IRCoT).
 ```bash
+$ cd Adaptive-RAG
 $ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.10.2-linux-x86_64.tar.gz
 $ wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.10.2-linux-x86_64.tar.gz.sha512
 $ shasum -a 512 -c elasticsearch-7.10.2-linux-x86_64.tar.gz.sha512
@@ -71,7 +70,7 @@ yellow open musique         yAyiaj5rSXWEvoeH7-umcg 1 1   139416 0  81.9mb  81.9m
 yellow open wiki            -J8mtXSkRxWZJ5mGkIyCcQ 1 1 21015324 0  13.3gb  13.3gb
 ```
 
-### 1.4. Dataset Split for AQA experiments
+### 1.4. Sample and Split Dataset for AQA experiments
 
 In our experiments, we use the gold complexity labels from the data used to train AdaptiveRAG's classifier, which can be downloaded by:
 ```bash
@@ -100,13 +99,13 @@ python AQA_dataset_organizer.py --train_file_path "$TRAIN_FILE_PATH" --raw_data_
 Note: To use silver+binary version, change the TRAIN_FILE_PATH to silver_binary instead.
 
 ```bash
-python AQA_dataset_splitter.py
+python AQA_dataset_splitter.py # Will save the final data under AQA_Data_Final folder
 ```
 
 # 2. Experiments
 
-## 2.1. Config Files
-In the Adaptive-RAG repository, the hyperparameters and prompt schemes used in each experiment is defined using the config files in the [base_configs folder](AQA_project/Adaptive-RAG/base_configs). We chose the config files that were closest to our experiment setup and use them for our experiments. These files can be found under the [base_configs_selected_for_AQA folder](https://gitlab.science.ru.nl/mhoveyda/AdaptiveQA-2/-/tree/main/Adaptive-RAG/base_configs_selected_for_AQA?ref_type=heads).
+## 2.1. Agents' Configuration
+In Adaptive-RAG, the hyperparameters and prompt schemes for each experiment are defined in the config files located in the `base_configs` folder. We selected the most relevant config files for our experiments which can be found under the `Adaptive-RAG/base_configs_selected_for_AQA` folder.
 
 ## 2.2. Individual Agents' Evaluation
 
@@ -118,30 +117,79 @@ To run the experiments:
 ```bash
 export RETRIEVER_HOST="http://localhost"
 export RETRIEVER_PORT=8000
-./run_inference.sh {systm-type} # nor, oner, ircot
+export BASE_CONFIG_FOLDER=$(realpath "./base_configs_selected_for_AQA")
 ```
-<br>
-We did the Individual Agents evaluation for both the test and train datasets.  We use these results (answers) generated with the run_inference.sh script to train the CMAB. 
-
-
-## 2.2.2. Evaluate Results
-
-To evaluate experiments first adjust the `PREDICTION_DIR`, `OURPUT_DIR` and `LOG_DIR` variables in the `run_evaluation.sh` script and then;
+For test set:
 
 ```bash
-./run_evaluation.sh {systm-type} # nor, oner, ircot
+export BASE_LOG_FOLDER=$(mkdir -p "../LOGS/test/$(date +'%Y-%m-%d')" && realpath "../LOGS/test/$(date +'%Y-%m-%d')")
+export INPUT_PATH=$(realpath "../AQA_Data_Final/test_aware_210_51.jsonl")
+export BASE_OUTPUT_FOLDER=$(mkdir -p "$(dirname "../Results/test/IndividualAgents")" && realpath "../Results/test/IndividualAgents")
+
+./run_inference.sh noR
+./run_inference.sh oneR
+./run_inference.sh ircot
+
+```
+
+
+For train set:
+```bash
+export BASE_LOG_FOLDER=$(mkdir -p "$(dirname "../LOGS/train/$(date +'%Y-%m-%d')")" && realpath "../LOGS/train/$(date +'%Y-%m-%d')")
+export INPUT_PATH=$(realpath "../AQA_Data_Final/train_aware_210_51.jsonl")
+export BASE_OUTPUT_FOLDER=$(mkdir -p "$(dirname "../Results/train/IndividualAgents")" && realpath "../Results/train/IndividualAgents")
+
+./run_inference.sh noR
+./run_inference.sh oneR
+./run_inference.sh ircot
+
 ```
 <br>
-To view the overall scores check the OUTPUT_DIR and to check the per sample evaluation check the LOG_DIR.
-<br>
+We use the results (answers) generated with the run_inference.sh script to train and evaluate AQA and GPTSwarm. 
 
+
+### 2.2.2. Evaluate Results
+The evaluation should be run for all the combinations of `EVAL_TYPE` and `MODEL_TYPE`
+
+```bash
+export EVAL_TYPE="train" # or train
+export PREDICTION_DIR=$(realpath "../Results/$EVAL_TYPE/IndividualAgents")
+export GOLD_FILE=$(realpath "../AQA_Data_Final/${EVAL_TYPE}_aware_210_51.jsonl")
+export OUTPUT_DIR=$(mkdir -p "../Evaluation/IndividualAgents/$EVAL_TYPE" && realpath "../Evaluation/IndividualAgents/$EVAL_TYPE")
+export MODEL_TYPE="NoR" # or oner or ircot 
+export LOG_DIR=$(mkdir -p "../LOGS/Evaluation/IndividualAgents/$EVAL_TYPE/$(date +'%Y-%m-%d')" && realpath "../LOGS/Evaluation/IndividualAgents/$EVAL_TYPE/$(date +'%Y-%m-%d')")
+
+./run_evaluation.sh
+```
+
+To view the overall scores check the  `OUTPUT_DIR` and to check the per sample evaluation check the `LOG_DIR`.
 To Visualize the scores use the `visualize_results.py` script and feed the score files paths to it. 
 
 
-## 2.4. AQA Train and Evaluation
-To train and test for Individual and Orchestrated optimization with AQA, make sure `ircot` and `Adaptive-RAG` repositories are available. Afterwards, Use `CMAB_last.py` and `CMAB_last_swarm.py` scripts to train and the relevant evaluation scripts for assessment. 
+## 2.3. AQA Train and Evaluation
+First to prepare train and test files, run the script `Adaptive-RAG/preprocess_results_for_CMAB_and_GPTSwarm_experiments.ipynb`. The resulting test and train files are in the format suitable for CMAB experiments.
 
-## 2.5. GPTSwarm Train and Evaluation
-Necessary changes are made to `GPTSwarm` repository to support our graph design. You can run `run_aqa.py` script to train and evaluate GPTSwarm to compare it with AQA.
+Use `CMAB_last.py` and `CMAB_last_swarm.py` scripts to train and the relevant evaluation scripts for assessment. 
+
+
+```bash
+python CMAB_last.py ./Results/processed_data_for_CMAB/train_aware_210_51_complete.jsonl LOGS/CMAB_Ind/logss.txt
+```
+
+```bash
+python CMAB_last_swarm.py ./Results/processed_data_for_CMAB/train_aware_210_51_complete.jsonl ./Results/processed_data_for_CMAB/test_aware_210_51_complete.jsonl LOGS/CMAB_Swarm/logs.txt
+```
+
+## 2.4. GPTSwarm Train and Evaluation
+Necessary changes are made to `GPTSwarm` repository to support our graph design. Run the following script to train and evaluate GPTSwarm and compare it with AQA;
+
+```bash
+cd GPTSwarm
+conda create -n swarm python=3.10
+conda activate swarm
+pip install poetry
+poetry install
+PYTHONPATH=. python experiments/run_aqa.py > ../LOGS/GPTSwarm/logs.txt 2>&1
+```
 
 - - - 

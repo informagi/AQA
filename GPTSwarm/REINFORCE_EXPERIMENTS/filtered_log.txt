@@ -1,0 +1,102 @@
+{'task': 'single_trivia_dev_6484'}
+{'task': 'single_trivia_dev_4771'}
+{'task': 'single_squad_dev_486'}
+{'task': 'single_squad_dev_3598'}
+Postprocessed answer: ['Yoda']
+Postprocessed answer: ['Cardiff']
+Postprocessed answer: ['two']
+Postprocessed answer: ['two']
+{'task': '5ae39e9c5542990afbd1e195'}
+{'task': '5a7e04b05542995f4f40238a'}
+{'task': 'single_nq_dev_2922'}
+{'task': 'single_trivia_dev_7689'}
+Postprocessed answer: ['The Captain Matchbox Whoopee Band']
+Postprocessed answer: ['National League']
+Postprocessed answer: ['Neptune']
+Postprocessed answer: ['Nan Aye Khine']
+{'task': '2hop__83489_747874'}
+{'task': '02323884085611ebbd59ac1f6bf848b6'}
+{'task': '5ab9b7d555429970cfb8eb7a'}
+{'task': '4c7a03560bdd11eba7f7acde48001122'}
+Postprocessed answer: ['Andy Murray']
+Postprocessed answer: ['no']
+Postprocessed answer: ['Lee Sung-kyung']
+Postprocessed answer: ['Beijing']
+{'task': '5ab32256554299233954ff22'}
+{'task': 'single_squad_dev_4405'}
+{'task': '2hop__528263_865831'}
+{'task': 'single_squad_dev_1294'}
+Postprocessed answer: ['CEO']
+Postprocessed answer: ['Captain of the Yeomen of the Guard']
+Postprocessed answer: ['Shelby County']
+Postprocessed answer: ['16th and 17th centuries']
+{'task': '5a8add4c5542992d82986fb4'}
+{'task': '0745c7f20bdd11eba7f7acde48001122'}
+{'task': '2hop__540035_113442'}
+{'task': '5ee5d6ca08e811ebbda6ac1f6bf848b6'}
+Postprocessed answer: ['Mohamed Salah']
+Postprocessed answer: ['John Huston']
+Postprocessed answer: ['November 27, 1939']
+Postprocessed answer: ["My Wife's Best Friend"]
+{'task': 'single_trivia_dev_7410'}
+{'task': 'single_trivia_dev_2834'}
+{'task': 'single_trivia_dev_1059'}
+{'task': 'single_nq_dev_3972'}
+Postprocessed answer: ['paint']
+Postprocessed answer: ['New York City']
+Postprocessed answer: ['Scotland']
+Postprocessed answer: ['Pink Floyd']
+{'task': 'single_nq_dev_1942'}
+{'task': '2hop__816977_6455'}
+{'task': '5ae70f4c5542991bbc9761b2'}
+{'task': '8e85a6bd086311ebbd5eac1f6bf848b6'}
+Postprocessed answer: ['Naggaroth']
+Postprocessed answer: ['Mozilla Firefox']
+Postprocessed answer: ['Afghanistan']
+Postprocessed answer: ['Victor Chandler']
+{'task': '172d29020bde11eba7f7acde48001122'}
+{'task': '2hop__53147_7298'}
+{'task': '3441959e090f11ebbdadac1f6bf848b6'}
+{'task': 'single_nq_dev_3518'}
+Postprocessed answer: ["St. Peter's Church, Audley End"]
+Postprocessed answer: ['Billy Joel']
+Postprocessed answer: ['Flirting In The Air']
+Postprocessed answer: ['Mark Lawson']
+{'task': '2hop__59612_42429'}
+{'task': 'single_trivia_dev_3511'}
+{'task': 'a1f15751088e11ebbd70ac1f6bf848b6'}
+{'task': 'single_nq_dev_537'}
+Postprocessed answer: ['1763']
+Postprocessed answer: ['Auguste Rodin']
+Postprocessed answer: ['Two Cops']
+Postprocessed answer: ['malice']
+{'task': '3hop1__545624_2053_52946'}
+{'task': '5a8b120755429949d91db4a4'}
+{'task': '5ae13bca55429901ffe4ae17'}
+{'task': 'single_nq_dev_1666'}
+Postprocessed answer: ['NBC']
+Postprocessed answer: ['United States']
+Postprocessed answer: ['Jessy J']
+Postprocessed answer: ['Bob Dylan']
+{'task': 'single_trivia_dev_881'}
+{'task': '5ab7ba7555429928e1fe38b5'}
+{'task': '0d118fb00bdb11eba7f7acde48001122'}
+{'task': 'single_trivia_dev_184'}
+Postprocessed answer: ['adrenal gland']
+Postprocessed answer: ['James Mitchum']
+Postprocessed answer: ['unknown']
+Postprocessed answer: ['World War II']
+{'task': 'single_trivia_dev_7602'}
+{'task': 'single_trivia_dev_2993'}
+{'task': '2hop__503085_110222'}
+{'task': '5a77727555429972597f1540'}
+Postprocessed answer: ['Eritrea']
+Postprocessed answer: ['New Zealand']
+Postprocessed answer: ['10 June 1819']
+Postprocessed answer: ['Sarah Paulson']
+{'task': '5ab27287554299722f9b4d2c'}
+{'task': 'single_squad_dev_234'}
+{'task': '0cebab5a088011ebbd6cac1f6bf848b6'}
+Postprocessed answer: ['The Game of Life']
+Postprocessed answer: ['Frédéric Chopin']
+Postprocessed answer: ['Hootenanny Hoot']
