@@ -24,6 +24,7 @@ AQA_Data_Final/
 cache/
 LOGS/
 Results/
+!AQA_project/Results/processed_data_for_CMAB/
 
 
 # From GPTSwarm/.gitignore
